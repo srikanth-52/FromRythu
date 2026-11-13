@@ -1,0 +1,72 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Manage Customers - Admin Portal{% endblock %}
+
+{% block content %}
+<div class="dashboard-layout">
+  {% include 'admin_panel/sidebar.html' with active_tab='customers' %}
+
+  <div class="dashboard-main">
+    <div class="dashboard-header">
+      <div>
+        <h4 class="fw-bold mb-0 text-danger">
+          <i class="bi bi-person-hearts me-2"></i>Registered Consumer Households
+        </h4>
+        <small class="text-muted">Overview of consumers buying direct from farmers</small>
+      </div>
+    </div>
+
+    <div class="dashboard-content-body">
+      <div class="card-table-wrapper">
+        <div class="table-responsive">
+          <table class="table table-rythu">
+            <thead>
+              <tr>
+                <th>Customer Name</th>
+                <th>Contact Info</th>
+                <th>Delivery Location</th>
+                <th>Total Orders</th>
+                <th>Total Spend</th>
+                <th>Joined On</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for c in customers %}
+                <tr>
+                  <td>
+                    <div class="fw-bold fs-6 text-dark">{{ c.get_full_name|default:c.username }}</div>
+                    <small class="text-muted">@{{ c.username }}</small>
+                  </td>
+                  <td>
+                    <div>{{ c.email }}</div>
+                    <small class="text-muted">{{ c.phone_number|default:"-" }}</small>
+                  </td>
+                  <td>
+                    <div>{{ c.city|default:"Telangana" }}</div>
+                    <small class="text-muted">{{ c.pincode|default:"" }}</small>
+                  </td>
+                  <td>
+                    <span class="badge bg-light text-dark border">{{ c.order_count|default:0 }} orders</span>
+                  </td>
+                  <td>
+                    <strong class="text-success">₹{{ c.total_spent|default:0|floatformat:2 }}</strong>
+                  </td>
+                  <td>
+                    <small class="text-muted">{{ c.date_joined|date:"M d, Y" }}</small>
+                  </td>
+                </tr>
+              {% empty %}
+                <tr>
+                  <td colspan="6" class="text-center py-5 text-muted">No customers registered yet.</td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+

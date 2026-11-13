@@ -1,0 +1,108 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Orders Received - Rythu Portal{% endblock %}
+
+{% block content %}
+<div class="dashboard-layout">
+  {% include 'farmer/sidebar.html' with active_tab='orders' %}
+
+  <div class="dashboard-main">
+    <div class="dashboard-header">
+      <div>
+        <h4 class="fw-bold mb-0 text-success">
+          <i class="bi bi-receipt me-2"></i>Customer Orders for Your Harvest
+        </h4>
+        <small class="text-muted">Accept incoming orders, pack fresh from the farm, and dispatch</small>
+      </div>
+      <div class="d-flex gap-2">
+        <a href="{% url 'farmers:orders' %}" class="btn btn-sm {% if not selected_status %}btn-success{% else %}btn-outline-secondary{% endif %}">All</a>
+        <a href="{% url 'farmers:orders' %}?status=pending" class="btn btn-sm {% if selected_status == 'pending' %}btn-warning text-dark{% else %}btn-outline-warning text-dark{% endif %}">Pending</a>
+        <a href="{% url 'farmers:orders' %}?status=accepted" class="btn btn-sm {% if selected_status == 'accepted' %}btn-primary{% else %}btn-outline-primary{% endif %}">Accepted</a>
+        <a href="{% url 'farmers:orders' %}?status=shipped" class="btn btn-sm {% if selected_status == 'shipped' %}btn-info text-white{% else %}btn-outline-info{% endif %}">Shipped</a>
+        <a href="{% url 'farmers:orders' %}?status=delivered" class="btn btn-sm {% if selected_status == 'delivered' %}btn-success{% else %}btn-outline-success{% endif %}">Delivered</a>
+      </div>
+    </div>
+
+    <div class="dashboard-content-body">
+      <div class="card-table-wrapper">
+        <div class="table-responsive">
+          <table class="table table-rythu">
+            <thead>
+              <tr>
+                <th>Order # & Date</th>
+                <th>Produce Ordered</th>
+                <th>Buyer & Delivery Info</th>
+                <th>Amount</th>
+                <th>Status</th>
+                <th>Update Progress</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for item in order_items %}
+                <tr>
+                  <td>
+                    <div class="fw-bold fs-6 text-dark">{{ item.order.order_number }}</div>
+                    <small class="text-muted">{{ item.order.created_at|date:"d M Y, H:i" }}</small>
+                    <div class="mt-1">
+                      <span class="badge {% if item.order.payment_status == 'completed' %}bg-success-subtle text-success{% else %}bg-warning-subtle text-warning{% endif %}">
+                        {{ item.order.get_payment_status_display }}
+                      </span>
+                    </div>
+                  </td>
+                  <td>
+                    <div class="fw-bold text-dark">{{ item.product_name }}</div>
+                    <span class="badge bg-light text-dark border p-1">
+                      Qty: <strong>{{ item.quantity }} {{ item.unit }}</strong> @ ₹{{ item.unit_price }}/{{ item.unit }}
+                    </span>
+                  </td>
+                  <td>
+                    <div class="fw-semibold text-dark">{{ item.order.shipping_full_name }}</div>
+                    <div class="small text-muted"><i class="bi bi-telephone me-1"></i> {{ item.order.shipping_phone }}</div>
+                    <div class="small text-secondary text-truncate" style="max-width: 220px;" title="{{ item.order.shipping_address }}, {{ item.order.shipping_city }}">
+                      <i class="bi bi-geo-alt me-1"></i> {{ item.order.shipping_address }}, {{ item.order.shipping_city }} - {{ item.order.shipping_pincode }}
+                    </div>
+                  </td>
+                  <td>
+                    <div class="fw-bold text-success fs-6">₹{{ item.subtotal }}</div>
+                    <small class="text-muted">via {{ item.order.payment.payment_method|default:"COD" }}</small>
+                  </td>
+                  <td>
+                    <span class="badge badge-status badge-status-{{ item.item_status }}">
+                      {{ item.get_item_status_display }}
+                    </span>
+                  </td>
+                  <td>
+                    <form method="POST" action="{% url 'farmers:update_order_status' item.id %}" class="d-flex gap-1">
+                      {% csrf_token %}
+                      <select name="status" class="form-select form-select-sm" style="width: 140px;">
+                        <option value="pending" {% if item.item_status == 'pending' %}selected{% endif %}>Pending</option>
+                        <option value="accepted" {% if item.item_status == 'accepted' %}selected{% endif %}>Accepted</option>
+                        <option value="packed" {% if item.item_status == 'packed' %}selected{% endif %}>Packed Fresh</option>
+                        <option value="shipped" {% if item.item_status == 'shipped' %}selected{% endif %}>Dispatched</option>
+                        <option value="delivered" {% if item.item_status == 'delivered' %}selected{% endif %}>Delivered</option>
+                        <option value="cancelled" {% if item.item_status == 'cancelled' %}selected{% endif %}>Cancelled</option>
+                      </select>
+                      <button type="submit" class="btn btn-sm btn-success" title="Save Status">
+                        <i class="bi bi-check2"></i>
+                      </button>
+                    </form>
+                  </td>
+                </tr>
+              {% empty %}
+                <tr>
+                  <td colspan="6" class="text-center py-5 text-muted">
+                    <i class="bi bi-inbox fs-1 d-block mb-2"></i>
+                    No orders matching the selected filter criteria.
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+

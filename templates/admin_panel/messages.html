@@ -1,0 +1,83 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Communications Monitor - Admin Portal{% endblock %}
+
+{% block content %}
+<div class="dashboard-layout">
+  {% include 'admin_panel/sidebar.html' with active_tab='messages' %}
+
+  <div class="dashboard-main">
+    <div class="dashboard-header">
+      <div>
+        <h4 class="fw-bold mb-0 text-danger">
+          <i class="bi bi-chat-dots me-2"></i>Farmer-Customer Chat Oversight
+        </h4>
+        <small class="text-muted">Ensure high customer satisfaction, quick responses, and fair trade practices</small>
+      </div>
+    </div>
+
+    <div class="dashboard-content-body">
+      <div class="card-table-wrapper">
+        <div class="card-table-header">
+          <h5 class="fw-bold mb-0">Platform Direct Messages Log</h5>
+          <span class="badge bg-light text-muted border">Support & Oversight</span>
+        </div>
+        <div class="table-responsive">
+          <table class="table table-rythu">
+            <thead>
+              <tr>
+                <th>Date & Time</th>
+                <th>Sender</th>
+                <th>Recipient</th>
+                <th>Related Produce</th>
+                <th>Message Content</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for msg in messages_list %}
+                <tr>
+                  <td><small class="text-muted">{{ msg.created_at|date:"M d, H:i" }}</small></td>
+                  <td>
+                    <strong>{{ msg.sender.username }}</strong>
+                    <span class="badge bg-light text-dark border text-capitalize">{{ msg.sender.role }}</span>
+                  </td>
+                  <td>
+                    <strong>{{ msg.receiver.username }}</strong>
+                    <span class="badge bg-light text-dark border text-capitalize">{{ msg.receiver.role }}</span>
+                  </td>
+                  <td>
+                    {% if msg.product %}
+                      <small class="fw-semibold text-success">{{ msg.product.name }}</small>
+                    {% else %}
+                      <small class="text-muted">General inquiry</small>
+                    {% endif %}
+                  </td>
+                  <td>
+                    <div class="small text-secondary text-truncate" style="max-width: 320px;" title="{{ msg.content }}">
+                      {{ msg.content }}
+                    </div>
+                  </td>
+                  <td>
+                    {% if msg.is_read %}
+                      <span class="badge bg-light text-muted">Read</span>
+                    {% else %}
+                      <span class="badge bg-success-subtle text-success">Unread</span>
+                    {% endif %}
+                  </td>
+                </tr>
+              {% empty %}
+                <tr>
+                  <td colspan="6" class="text-center py-5 text-muted">No communication records logged yet.</td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+

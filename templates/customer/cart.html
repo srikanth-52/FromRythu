@@ -1,0 +1,137 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Shopping Cart - FromRythu Direct Marketplace{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <div class="mb-4">
+    <h2 class="fw-bold mb-1 text-success"><i class="bi bi-cart3 me-2"></i> Your Fresh Produce Cart</h2>
+    <p class="text-muted">You are purchasing pure food grains and farm harvests directly from Rythus.</p>
+  </div>
+
+  {% if items %}
+    <div class="row g-4">
+      <div class="col-lg-8">
+        <div class="card border-0 shadow-sm rounded-4 overflow-hidden bg-white">
+          <div class="table-responsive">
+            <table class="table table-rythu">
+              <thead>
+                <tr>
+                  <th>Produce & Farmer</th>
+                  <th>Rate</th>
+                  <th style="width: 170px;">Quantity</th>
+                  <th>Subtotal</th>
+                  <th>Remove</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for item in items %}
+                  <tr>
+                    <td>
+                      <div class="d-flex align-items-center gap-3">
+                        <img src="{{ item.product.display_image }}" class="rounded-3 shadow-sm" style="width: 54px; height: 54px; object-fit: cover;">
+                        <div>
+                          <h6 class="fw-bold mb-0">
+                            <a href="{% url 'products:detail' slug=item.product.slug %}" class="text-dark">{{ item.product.name }}</a>
+                          </h6>
+                          <small class="text-muted">
+                            <i class="bi bi-person-circle text-success"></i> Rythu: {{ item.product.farmer.farmer_profile.farm_name|default:item.product.farmer.username }}
+                          </small>
+                        </div>
+                      </div>
+                    </td>
+                    <td>
+                      <strong>₹{{ item.product.price_per_unit }}</strong>
+                      <div class="small text-muted">/{{ item.product.get_unit_display }}</div>
+                    </td>
+                    <td>
+                      <form action="{% url 'orders:update_cart' item.id %}" method="POST" class="d-flex align-items-center gap-1">
+                        {% csrf_token %}
+                        <div class="input-group input-group-sm">
+                          <button class="btn btn-outline-secondary" type="submit" name="action" value="decrease">-</button>
+                          <input type="number" step="0.5" name="quantity" class="form-control text-center cart-qty-input" value="{{ item.quantity }}" min="{{ item.product.min_order_quantity }}" max="{{ item.product.available_stock }}">
+                          <button class="btn btn-outline-secondary" type="submit" name="action" value="increase">+</button>
+                        </div>
+                      </form>
+                      <small class="text-muted d-block mt-1">{{ item.product.unit }}</small>
+                    </td>
+                    <td>
+                      <strong class="text-success fs-6">₹{{ item.subtotal|floatformat:2 }}</strong>
+                    </td>
+                    <td>
+                      <form action="{% url 'orders:remove_from_cart' item.id %}" method="POST">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-sm btn-outline-danger" title="Remove from cart">
+                          <i class="bi bi-trash"></i>
+                        </button>
+                      </form>
+                    </td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+
+          <div class="p-3 bg-light d-flex justify-content-between align-items-center">
+            <a href="{% url 'products:list' %}" class="btn btn-outline-success btn-sm">
+              <i class="bi bi-arrow-left me-1"></i> Continue Shopping
+            </a>
+            <span class="small text-muted">Stock reserved for your order</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Order Summary Card -->
+      <div class="col-lg-4">
+        <div class="card border-0 shadow-sm rounded-4 p-4 bg-white sticky-top" style="top: 90px;">
+          <h5 class="fw-bold mb-3 pb-2 border-bottom">Order Summary</h5>
+
+          <div class="d-flex justify-content-between mb-2">
+            <span class="text-muted">Produce Subtotal:</span>
+            <strong class="text-dark">₹{{ subtotal|floatformat:2 }}</strong>
+          </div>
+
+          <div class="d-flex justify-content-between mb-2">
+            <span class="text-muted">Delivery Charge:</span>
+            {% if delivery_fee == 0 %}
+              <span class="text-success fw-bold">FREE (Orders ₹500+)</span>
+            {% else %}
+              <span class="text-dark">₹{{ delivery_fee|floatformat:2 }}</span>
+            {% endif %}
+          </div>
+
+          <hr>
+
+          <div class="d-flex justify-content-between align-items-center mb-4">
+            <span class="fs-5 fw-bold text-dark">Total Amount:</span>
+            <span class="fs-3 fw-bolder text-success">₹{{ total|floatformat:2 }}</span>
+          </div>
+
+          <a href="{% url 'orders:checkout' %}" class="btn btn-success btn-lg w-100 fw-bold shadow">
+            Proceed to Checkout <i class="bi bi-arrow-right ms-1"></i>
+          </a>
+
+          <div class="mt-4 p-3 bg-light rounded-3 text-center small text-secondary">
+            <i class="bi bi-shield-check text-success fs-5 d-block mb-1"></i>
+            <strong>100% Direct Farmer Payout</strong><br>
+            Your payment directly supports local farming families.
+          </div>
+        </div>
+      </div>
+    </div>
+  {% else %}
+    <div class="card border-0 shadow-sm rounded-4 p-5 text-center bg-white my-4">
+      <i class="bi bi-cart-x fs-1 text-muted mb-3"></i>
+      <h4 class="fw-bold">Your cart is currently empty</h4>
+      <p class="text-muted">Explore fresh farm produce, pure dals, and ancient millets from verified Rythus.</p>
+      <div class="mt-3">
+        <a href="{% url 'products:list' %}" class="btn btn-success btn-lg px-4 fw-bold">
+          <i class="bi bi-basket me-2"></i> Browse Farm Produce
+        </a>
+      </div>
+    </div>
+  {% endif %}
+</div>
+{% endblock %}
+

@@ -1,0 +1,94 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Farmer Inquiries & Chats - Customer Portal{% endblock %}
+
+{% block content %}
+<div class="dashboard-layout">
+  {% include 'customer/sidebar.html' with active_tab='messages' %}
+
+  <div class="dashboard-main">
+    <div class="dashboard-header">
+      <div>
+        <h4 class="fw-bold mb-0 text-primary">
+          <i class="bi bi-chat-dots me-2"></i>Direct Farmer Communications
+        </h4>
+        <small class="text-muted">Chat directly with the farmers cultivating your food grains and vegetables</small>
+      </div>
+    </div>
+
+    <div class="dashboard-content-body">
+      <div class="chat-container shadow-sm">
+        <!-- Contacts Sidebar -->
+        <div class="chat-sidebar">
+          <div class="p-3 border-bottom bg-light">
+            <h6 class="fw-bold mb-0 text-dark">Farmers List</h6>
+          </div>
+          {% for contact in contacts %}
+            <a href="{% url 'customers:messages' %}?chat_with={{ contact.id }}" class="chat-contact-item text-decoration-none text-dark {% if active_contact.id == contact.id %}active{% endif %}">
+              <div class="rounded-circle bg-success text-white d-flex align-items-center justify-content-center fw-bold" style="width: 40px; height: 40px;">
+                {{ contact.first_name|first|default:contact.username|first|upper }}
+              </div>
+              <div class="overflow-hidden flex-fill">
+                <div class="fw-bold text-truncate">{{ contact.farmer_profile.farm_name|default:contact.username }}</div>
+                <small class="text-success"><i class="bi bi-patch-check"></i> Rythu • {{ contact.city|default:"Farmer" }}</small>
+              </div>
+            </a>
+          {% empty %}
+            <div class="p-4 text-center text-muted small">No conversations started yet.</div>
+          {% endfor %}
+        </div>
+
+        <!-- Chat Messages Area -->
+        <div class="chat-area">
+          {% if active_contact %}
+            <div class="p-3 border-bottom bg-white d-flex align-items-center justify-content-between">
+              <div class="d-flex align-items-center gap-2">
+                <div class="rounded-circle bg-success text-white d-flex align-items-center justify-content-center fw-bold" style="width: 36px; height: 36px;">
+                  {{ active_contact.first_name|first|default:active_contact.username|first|upper }}
+                </div>
+                <div>
+                  <h6 class="fw-bold mb-0 text-dark">{{ active_contact.farmer_profile.farm_name|default:active_contact.username }}</h6>
+                  <small class="text-muted">{{ active_contact.city|default:"Telangana" }} • Rythu</small>
+                </div>
+              </div>
+            </div>
+
+            <div class="chat-messages-box">
+              {% for msg in chat_thread %}
+                <div class="chat-bubble {% if msg.sender == user %}chat-bubble-sent{% else %}chat-bubble-received{% endif %}">
+                  <div class="small fw-semibold mb-1 opacity-75">
+                    {% if msg.sender == user %}You{% else %}{{ msg.sender.first_name|default:msg.sender.username }} (Farmer){% endif %}
+                  </div>
+                  <div>{{ msg.content }}</div>
+                  <div class="text-end small opacity-75 mt-1" style="font-size: 0.72rem;">
+                    {{ msg.created_at|date:"M d, H:i" }}
+                  </div>
+                </div>
+              {% empty %}
+                <div class="text-center text-muted my-auto">Start the conversation with farmer {{ active_contact.username }}.</div>
+              {% endfor %}
+            </div>
+
+            <form method="POST" action="{% url 'customers:messages' %}" class="chat-input-bar">
+              {% csrf_token %}
+              <input type="hidden" name="receiver_id" value="{{ active_contact.id }}">
+              <input type="text" name="content" class="form-control" placeholder="Ask farmer about harvest freshness, packaging, bulk orders..." required autofocus>
+              <button type="submit" class="btn btn-primary fw-bold px-4">
+                <i class="bi bi-send-fill me-1"></i> Send
+              </button>
+            </form>
+          {% else %}
+            <div class="text-center my-auto p-5 text-muted">
+              <i class="bi bi-chat-quote fs-1 d-block mb-3 text-secondary"></i>
+              <h5>Select a farmer from the left to view messages</h5>
+              <p class="small text-muted">You can also message a farmer directly from any produce details page.</p>
+            </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+

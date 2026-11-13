@@ -1,0 +1,150 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Customer Dashboard - FromRythu{% endblock %}
+
+{% block content %}
+<div class="dashboard-layout">
+  {% include 'customer/sidebar.html' with active_tab='dashboard' %}
+
+  <div class="dashboard-main">
+    <div class="dashboard-header">
+      <div>
+        <h4 class="fw-bold mb-0 text-primary">
+          <i class="bi bi-speedometer2 me-2"></i>Household Dashboard
+        </h4>
+        <small class="text-muted">Welcome, {{ user.first_name|default:user.username }} • Direct farm-to-table shopping</small>
+      </div>
+      <a href="{% url 'products:list' %}" class="btn btn-primary fw-semibold btn-sm">
+        <i class="bi bi-basket me-1"></i> Shop Farm Fresh
+      </a>
+    </div>
+
+    <div class="dashboard-content-body">
+      <!-- 3 Stat Cards -->
+      <div class="row g-3 mb-4">
+        <div class="col-sm-4">
+          <div class="stat-card">
+            <div>
+              <div class="stat-label">Total Orders Placed</div>
+              <div class="stat-number">{{ total_orders }}</div>
+              <small class="text-muted">Direct from farmers</small>
+            </div>
+            <div class="stat-icon-wrapper icon-blue">
+              <i class="bi bi-receipt"></i>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-sm-4">
+          <div class="stat-card">
+            <div>
+              <div class="stat-label">Active Dispatches</div>
+              <div class="stat-number text-warning">{{ active_orders }}</div>
+              <small class="text-warning"><i class="bi bi-truck"></i> Packing & in transit</small>
+            </div>
+            <div class="stat-icon-wrapper icon-orange">
+              <i class="bi bi-truck"></i>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-sm-4">
+          <div class="stat-card">
+            <div>
+              <div class="stat-label">Delivered Orders</div>
+              <div class="stat-number text-success">{{ delivered_orders }}</div>
+              <small class="text-success"><i class="bi bi-check-circle"></i> Enjoyed at home</small>
+            </div>
+            <div class="stat-icon-wrapper icon-green">
+              <i class="bi bi-bag-check-fill"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="row g-4">
+        <!-- Recent Orders -->
+        <div class="col-lg-7">
+          <div class="card-table-wrapper">
+            <div class="card-table-header">
+              <h5 class="fw-bold mb-0">Recent Direct Orders</h5>
+              <a href="{% url 'customers:my_orders' %}" class="btn btn-sm btn-outline-primary">View All Orders</a>
+            </div>
+            <div class="table-responsive">
+              <table class="table table-rythu">
+                <thead>
+                  <tr>
+                    <th>Order #</th>
+                    <th>Date</th>
+                    <th>Amount</th>
+                    <th>Status</th>
+                    <th>Tracking</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for o in customer_orders %}
+                    <tr>
+                      <td><strong>{{ o.order_number }}</strong></td>
+                      <td><small class="text-muted">{{ o.created_at|date:"M d, Y" }}</small></td>
+                      <td class="fw-bold text-success">₹{{ o.final_amount }}</td>
+                      <td>
+                        <span class="badge badge-status badge-status-{{ o.status }}">
+                          {{ o.get_status_display }}
+                        </span>
+                      </td>
+                      <td>
+                        <a href="{% url 'customers:order_detail' o.order_number %}" class="btn btn-sm btn-outline-primary">
+                          Details
+                        </a>
+                      </td>
+                    </tr>
+                  {% empty %}
+                    <tr>
+                      <td colspan="5" class="text-center py-4 text-muted">
+                        No orders yet. <a href="{% url 'products:list' %}" class="text-primary fw-semibold">Start shopping fresh produce</a>!
+                      </td>
+                    </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- Recommended Produce -->
+        <div class="col-lg-5">
+          <div class="card-table-wrapper">
+            <div class="card-table-header">
+              <h5 class="fw-bold mb-0">Fresh from Verified Rythus</h5>
+              <a href="{% url 'products:list' %}" class="btn btn-sm btn-success">View All</a>
+            </div>
+            <div class="p-3">
+              {% for p in fresh_produce %}
+                <div class="d-flex align-items-center justify-content-between p-2 mb-2 bg-light rounded-3">
+                  <div class="d-flex align-items-center gap-2">
+                    <img src="{{ p.display_image }}" class="rounded" style="width: 44px; height: 44px; object-fit: cover;">
+                    <div>
+                      <div class="fw-bold text-truncate" style="max-width: 140px;">
+                        <a href="{% url 'products:detail' slug=p.slug %}" class="text-dark">{{ p.name }}</a>
+                      </div>
+                      <small class="text-success fw-semibold">₹{{ p.price_per_unit }}/{{ p.unit }}</small>
+                    </div>
+                  </div>
+                  <form action="{% url 'orders:add_to_cart' p.id %}" method="POST">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-sm btn-outline-success">
+                      <i class="bi bi-cart-plus"></i> Add
+                    </button>
+                  </form>
+                </div>
+              {% endfor %}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+

@@ -1,0 +1,100 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Sales Report & Revenue Analytics - Rythu Portal{% endblock %}
+
+{% block content %}
+<div class="dashboard-layout">
+  {% include 'farmer/sidebar.html' with active_tab='reports' %}
+
+  <div class="dashboard-main">
+    <div class="dashboard-header">
+      <div>
+        <h4 class="fw-bold mb-0 text-success">
+          <i class="bi bi-bar-chart-line me-2"></i>Sales & Revenue Reports
+        </h4>
+        <small class="text-muted">Analyze your highest grossing produce and total harvest monetization</small>
+      </div>
+    </div>
+
+    <div class="dashboard-content-body">
+      <!-- Summary metrics -->
+      <div class="row g-3 mb-4">
+        <div class="col-md-6 col-xl-4">
+          <div class="stat-card">
+            <div>
+              <div class="stat-label">Total Realized Revenue</div>
+              <div class="stat-number text-success">₹{{ total_gross|floatformat:2 }}</div>
+              <small class="text-muted">Zero commission deducted</small>
+            </div>
+            <div class="stat-icon-wrapper icon-green">
+              <i class="bi bi-wallet2"></i>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-md-6 col-xl-4">
+          <div class="stat-card">
+            <div>
+              <div class="stat-label">Produce Units Sold</div>
+              <div class="stat-number">{{ total_qty_sold|floatformat:1 }}</div>
+              <small class="text-muted">Direct to consumer households</small>
+            </div>
+            <div class="stat-icon-wrapper icon-blue">
+              <i class="bi bi-boxes"></i>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-md-6 col-xl-4">
+          <div class="stat-card">
+            <div>
+              <div class="stat-label">Commission Paid</div>
+              <div class="stat-number text-primary">₹0.00</div>
+              <small class="text-success"><i class="bi bi-check-circle"></i> 100% money goes to you</small>
+            </div>
+            <div class="stat-icon-wrapper icon-orange">
+              <i class="bi bi-shield-check"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Produce Breakdown Table -->
+      <div class="card-table-wrapper mb-4">
+        <div class="card-table-header">
+          <h5 class="fw-bold mb-0">Sales by Produce Item</h5>
+          <span class="badge bg-light text-muted border">Ranked by Total Revenue</span>
+        </div>
+        <div class="table-responsive">
+          <table class="table table-rythu">
+            <thead>
+              <tr>
+                <th>Produce Name</th>
+                <th>Total Quantity Sold</th>
+                <th>Order Count</th>
+                <th>Gross Revenue</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for p in product_sales %}
+                <tr>
+                  <td><strong class="text-dark">{{ p.product_name }}</strong></td>
+                  <td>{{ p.total_qty }} {{ p.unit }}</td>
+                  <td>{{ p.order_count }} orders</td>
+                  <td class="fw-bold text-success fs-6">₹{{ p.total_revenue|floatformat:2 }}</td>
+                </tr>
+              {% empty %}
+                <tr>
+                  <td colspan="4" class="text-center py-4 text-muted">No sales logged yet.</td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+

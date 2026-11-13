@@ -1,0 +1,190 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Farmer Portal Dashboard - FromRythu{% endblock %}
+
+{% block content %}
+<div class="dashboard-layout">
+  {% include 'farmer/sidebar.html' with active_tab='dashboard' %}
+
+  <div class="dashboard-main">
+    <div class="dashboard-header">
+      <div>
+        <h4 class="fw-bold mb-0 text-success">
+          <i class="bi bi-speedometer2 me-2"></i>Rythu Dashboard
+        </h4>
+        <small class="text-muted">Welcome, {{ profile.farm_name }} • Direct Selling Central</small>
+      </div>
+      <div class="d-flex gap-2">
+        <a href="{% url 'farmers:add_product' %}" class="btn btn-success fw-semibold btn-sm">
+          <i class="bi bi-plus-circle me-1"></i> Add Harvest
+        </a>
+        <a href="{% url 'farmers:stock' %}" class="btn btn-outline-success fw-semibold btn-sm">
+          <i class="bi bi-boxes me-1"></i> Update Stock
+        </a>
+      </div>
+    </div>
+
+    <div class="dashboard-content-body">
+      <!-- 4 Stat Cards -->
+      <div class="row g-3 mb-4">
+        <div class="col-sm-6 col-xl-3">
+          <div class="stat-card">
+            <div>
+              <div class="stat-label">Total Revenue</div>
+              <div class="stat-number">₹{{ total_revenue|floatformat:2 }}</div>
+              <small class="text-success"><i class="bi bi-arrow-up-right"></i> Direct to bank</small>
+            </div>
+            <div class="stat-icon-wrapper icon-green">
+              <i class="bi bi-currency-rupee"></i>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-sm-6 col-xl-3">
+          <div class="stat-card">
+            <div>
+              <div class="stat-label">Active Produce</div>
+              <div class="stat-number">{{ active_products }}</div>
+              <small class="text-muted">of {{ total_products }} listed</small>
+            </div>
+            <div class="stat-icon-wrapper icon-blue">
+              <i class="bi bi-box-seam"></i>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-sm-6 col-xl-3">
+          <div class="stat-card">
+            <div>
+              <div class="stat-label">Orders Received</div>
+              <div class="stat-number">{{ total_orders }}</div>
+              <small class="text-primary"><i class="bi bi-bag-check"></i> From consumers</small>
+            </div>
+            <div class="stat-icon-wrapper icon-purple">
+              <i class="bi bi-receipt"></i>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-sm-6 col-xl-3">
+          <div class="stat-card">
+            <div>
+              <div class="stat-label">Pending Action</div>
+              <div class="stat-number text-warning">{{ pending_orders }}</div>
+              <small class="text-warning"><i class="bi bi-clock-history"></i> Needs confirmation</small>
+            </div>
+            <div class="stat-icon-wrapper icon-orange">
+              <i class="bi bi-exclamation-circle"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Low Stock Warnings -->
+      {% if low_stock_products %}
+        <div class="alert alert-warning border-0 shadow-sm rounded-4 mb-4 d-flex align-items-center justify-content-between">
+          <div class="d-flex align-items-center gap-2">
+            <i class="bi bi-exclamation-triangle-fill fs-4 text-warning"></i>
+            <div>
+              <strong>Low Inventory Stock Alert:</strong>
+              {% for p in low_stock_products %}
+                <span class="badge bg-danger ms-1">{{ p.name }}: {{ p.available_stock }} {{ p.unit }} left</span>
+              {% endfor %}
+            </div>
+          </div>
+          <a href="{% url 'farmers:stock' %}" class="btn btn-sm btn-outline-dark">Add Stock In</a>
+        </div>
+      {% endif %}
+
+      <div class="row g-4">
+        <!-- Recent Orders Received -->
+        <div class="col-lg-8">
+          <div class="card-table-wrapper">
+            <div class="card-table-header">
+              <h5 class="fw-bold mb-0">Recent Orders for Your Harvest</h5>
+              <a href="{% url 'farmers:orders' %}" class="btn btn-sm btn-outline-success">View All</a>
+            </div>
+            <div class="table-responsive">
+              <table class="table table-rythu">
+                <thead>
+                  <tr>
+                    <th>Order #</th>
+                    <th>Produce</th>
+                    <th>Qty</th>
+                    <th>Amount</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for item in recent_orders %}
+                    <tr>
+                      <td>
+                        <strong>{{ item.order.order_number }}</strong>
+                        <div class="small text-muted">{{ item.order.created_at|date:"M d, H:i" }}</div>
+                      </td>
+                      <td>
+                        <span class="fw-semibold">{{ item.product_name }}</span>
+                        <div class="small text-muted">{{ item.order.customer.username }}</div>
+                      </td>
+                      <td>{{ item.quantity }} {{ item.unit }}</td>
+                      <td class="fw-bold text-success">₹{{ item.subtotal }}</td>
+                      <td>
+                        <span class="badge badge-status badge-status-{{ item.item_status }}">
+                          {{ item.get_item_status_display }}
+                        </span>
+                      </td>
+                      <td>
+                        <a href="{% url 'farmers:orders' %}" class="btn btn-sm btn-light border">Update</a>
+                      </td>
+                    </tr>
+                  {% empty %}
+                    <tr>
+                      <td colspan="6" class="text-center py-4 text-muted">
+                        No orders received yet. Make sure your produce is active and priced well!
+                      </td>
+                    </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- Quick Produce Overview -->
+        <div class="col-lg-4">
+          <div class="card-table-wrapper">
+            <div class="card-table-header">
+              <h5 class="fw-bold mb-0">Your Active Produce</h5>
+              <a href="{% url 'farmers:add_product' %}" class="btn btn-sm btn-success">+ Add</a>
+            </div>
+            <div class="p-3">
+              {% for p in farmer_products %}
+                <div class="d-flex align-items-center justify-content-between p-2 mb-2 bg-light rounded-3">
+                  <div class="d-flex align-items-center gap-2">
+                    <img src="{{ p.display_image }}" class="rounded" style="width: 44px; height: 44px; object-fit: cover;">
+                    <div>
+                      <div class="fw-bold text-truncate" style="max-width: 140px;">{{ p.name }}</div>
+                      <small class="text-muted">₹{{ p.price_per_unit }}/{{ p.unit }}</small>
+                    </div>
+                  </div>
+                  <div class="text-end">
+                    <span class="badge {% if p.available_stock > 20 %}bg-success{% else %}bg-warning text-dark{% endif %}">
+                      {{ p.available_stock }} {{ p.unit }}
+                    </span>
+                    <div><a href="{% url 'farmers:edit_product' p.id %}" class="small text-decoration-none">Edit</a></div>
+                  </div>
+                </div>
+              {% empty %}
+                <div class="text-center py-4 text-muted">No produce listed yet.</div>
+              {% endfor %}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+

@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Sign In - FromRythu{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-md-6 col-lg-5">
+      <div class="card border-0 shadow-lg rounded-4 overflow-hidden">
+        <div class="p-4 text-center text-white bg-success" style="background-color: #1b4332 !important;">
+          <h3 class="fw-bold mb-1">Sign In to FromRythu</h3>
+          <p class="small text-light opacity-90 mb-0">Direct Marketplace for Rythus & Customers</p>
+        </div>
+
+        <div class="card-body p-4 p-md-5">
+          <div class="d-flex gap-2 mb-4">
+            <a href="{% url 'accounts:farmer_login' %}" class="btn btn-outline-success flex-fill small fw-bold">
+              <i class="bi bi-person-badge me-1"></i> Farmer Login
+            </a>
+            <a href="{% url 'accounts:customer_login' %}" class="btn btn-outline-primary flex-fill small fw-bold">
+              <i class="bi bi-bag-check me-1"></i> Customer Login
+            </a>
+          </div>
+
+          <form method="POST" action="{% url 'accounts:login' %}" class="needs-validation" novalidate>
+            {% csrf_token %}
+
+            <div class="mb-3">
+              <label class="form-label fw-semibold" for="id_username">Username</label>
+              <input type="text" name="username" class="form-control" id="id_username" placeholder="Enter username" required autofocus>
+            </div>
+
+            <div class="mb-4">
+              <label class="form-label fw-semibold" for="id_password">Password</label>
+              <input type="password" name="password" class="form-control" id="id_password" placeholder="Enter password" required>
+            </div>
+
+            <button type="submit" class="btn btn-rythu w-100 py-2 fs-6 fw-bold shadow-sm mb-3">
+              Sign In
+            </button>
+          </form>
+
+          <div class="text-center small">
+            Don't have an account? <a href="{% url 'accounts:register' %}" class="text-success fw-bold">Register here</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+

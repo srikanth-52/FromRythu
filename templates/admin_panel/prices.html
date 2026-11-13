@@ -1,0 +1,71 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Price Trends & Modifications - Admin Portal{% endblock %}
+
+{% block content %}
+<div class="dashboard-layout">
+  {% include 'admin_panel/sidebar.html' with active_tab='prices' %}
+
+  <div class="dashboard-main">
+    <div class="dashboard-header">
+      <div>
+        <h4 class="fw-bold mb-0 text-danger">
+          <i class="bi bi-tags me-2"></i>Marketplace Price Trends & Modifications
+        </h4>
+        <small class="text-muted">Ensure price transparency and monitor fair rates across agricultural produce</small>
+      </div>
+    </div>
+
+    <div class="dashboard-content-body">
+      <div class="card-table-wrapper">
+        <div class="card-table-header">
+          <h5 class="fw-bold mb-0">Farmer Price Adjustment Ledger</h5>
+          <span class="badge bg-light text-muted border">Price Tracking</span>
+        </div>
+        <div class="table-responsive">
+          <table class="table table-rythu">
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Produce Name</th>
+                <th>Farmer Source</th>
+                <th>Previous Rate</th>
+                <th>Updated Rate</th>
+                <th>Change</th>
+                <th>Reason Provided</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for log in price_logs %}
+                <tr>
+                  <td><small class="text-muted">{{ log.created_at|date:"M d, Y H:i" }}</small></td>
+                  <td><strong>{{ log.product.name }}</strong></td>
+                  <td>
+                    <span class="badge bg-light text-dark border">{{ log.product.farmer.username }}</span>
+                  </td>
+                  <td><span class="text-muted text-decoration-line-through">₹{{ log.old_price }}</span></td>
+                  <td><strong class="text-success fs-6">₹{{ log.new_price }}</strong></td>
+                  <td>
+                    {% if log.new_price < log.old_price %}
+                      <span class="badge bg-success-subtle text-success"><i class="bi bi-arrow-down"></i> Price Drop</span>
+                    {% else %}
+                      <span class="badge bg-warning-subtle text-warning"><i class="bi bi-arrow-up"></i> Increase</span>
+                    {% endif %}
+                  </td>
+                  <td><small class="text-secondary">{{ log.reason|default:"Farmer routine update" }}</small></td>
+                </tr>
+              {% empty %}
+                <tr>
+                  <td colspan="7" class="text-center py-5 text-muted">No price adjustments recorded yet.</td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+

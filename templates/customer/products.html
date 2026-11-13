@@ -1,0 +1,188 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}All Farm Produce - FromRythu Direct Marketplace{% endblock %}
+
+{% block content %}
+<div class="bg-light py-4 border-bottom mb-4">
+  <div class="container">
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+      <div>
+        <nav aria-label="breadcrumb">
+          <ol class="breadcrumb mb-1 small">
+            <li class="breadcrumb-item"><a href="{% url 'home' %}">Home</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Produce Catalog</li>
+            {% if selected_category %}
+              <li class="breadcrumb-item active">{{ selected_category.name }}</li>
+            {% endif %}
+          </ol>
+        </nav>
+        <h2 class="fw-bold mb-0 text-success">
+          {% if selected_category %}{{ selected_category.name }}{% elif query %}Search Results for "{{ query }}"{% else %}All Fresh Harvests{% endif %}
+        </h2>
+        <span class="text-muted small">Showing {{ total_count }} direct-from-farmer agricultural harvests</span>
+      </div>
+
+      <!-- Sorting Filter -->
+      <form method="GET" class="d-flex align-items-center gap-2">
+        {% if query %}<input type="hidden" name="q" value="{{ query }}">{% endif %}
+        {% if selected_category %}<input type="hidden" name="category" value="{{ selected_category.slug }}">{% endif %}
+        {% if organic %}<input type="hidden" name="organic" value="{{ organic }}">{% endif %}
+        
+        <label class="form-label small text-muted mb-0 text-nowrap">Sort By:</label>
+        <select name="sort" class="form-select form-select-sm" onchange="this.form.submit()" style="min-width: 170px;">
+          <option value="-created_at" {% if sort_by == '-created_at' %}selected{% endif %}>Newest First</option>
+          <option value="price_asc" {% if sort_by == 'price_asc' %}selected{% endif %}>Price: Low to High</option>
+          <option value="price_desc" {% if sort_by == 'price_desc' %}selected{% endif %}>Price: High to Low</option>
+          <option value="harvest" {% if sort_by == 'harvest' %}selected{% endif %}>Most Recent Harvest</option>
+        </select>
+      </form>
+    </div>
+  </div>
+</div>
+
+<div class="container mb-5">
+  <div class="row g-4">
+    <!-- Filters Sidebar -->
+    <div class="col-lg-3">
+      <div class="card border-0 shadow-sm rounded-4 p-4 sticky-top" style="top: 90px;">
+        <h5 class="fw-bold text-dark mb-3 pb-2 border-bottom">Filters</h5>
+
+        <form method="GET" action="{% url 'products:list' %}">
+          {% if query %}<input type="hidden" name="q" value="{{ query }}">{% endif %}
+
+          <!-- Categories Filter -->
+          <div class="mb-4">
+            <label class="fw-semibold small text-muted text-uppercase mb-2 d-block">Category</label>
+            <div class="list-group list-group-flush small">
+              <a href="{% url 'products:list' %}" class="list-group-item list-group-item-action {% if not selected_category %}active fw-bold text-white bg-success border-success{% endif %}">
+                All Categories
+              </a>
+              {% for cat in categories %}
+                <a href="{% url 'products:list' %}?category={{ cat.slug }}" class="list-group-item list-group-item-action {% if selected_category.slug == cat.slug %}active fw-bold text-white bg-success border-success{% endif %}">
+                  {{ cat.name }}
+                </a>
+              {% endfor %}
+            </div>
+          </div>
+
+          <!-- Organic Checkbox -->
+          <div class="mb-4">
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" name="organic" value="1" id="organicCheck" {% if organic == '1' %}checked{% endif %} onchange="this.form.submit()">
+              <label class="form-check-label fw-semibold text-dark small" for="organicCheck">
+                <i class="bi bi-patch-check-fill text-success me-1"></i> Certified Organic Only
+              </label>
+            </div>
+          </div>
+
+          <!-- Price Range Filter -->
+          <div class="mb-4">
+            <label class="fw-semibold small text-muted text-uppercase mb-2 d-block">Price Range (₹)</label>
+            <div class="d-flex gap-2">
+              <input type="number" name="min_price" class="form-control form-control-sm" placeholder="Min" value="{{ request.GET.min_price }}">
+              <input type="number" name="max_price" class="form-control form-control-sm" placeholder="Max" value="{{ request.GET.max_price }}">
+            </div>
+            <button type="submit" class="btn btn-sm btn-outline-success w-100 mt-2">Apply Filter</button>
+          </div>
+
+          <a href="{% url 'products:list' %}" class="btn btn-sm btn-light border w-100">Clear All Filters</a>
+        </form>
+      </div>
+    </div>
+
+    <!-- Product Grid -->
+    <div class="col-lg-9">
+      {% if page_obj %}
+        <div class="row g-4">
+          {% for product in page_obj %}
+            <div class="col-md-6 col-xl-4">
+              <div class="produce-card">
+                <div class="produce-card-img-wrapper">
+                  <img src="{{ product.display_image }}" alt="{{ product.name }}" class="produce-card-img">
+                  {% if product.is_organic %}
+                    <span class="badge-tag-organic"><i class="bi bi-patch-check-fill"></i> Organic</span>
+                  {% endif %}
+                  {% if product.direct_savings_percentage > 0 %}
+                    <span class="badge-tag-saving">Save {{ product.direct_savings_percentage }}%</span>
+                  {% endif %}
+                </div>
+                <div class="produce-card-body">
+                  <div class="produce-farmer-badge">
+                    <i class="bi bi-person-circle text-success"></i>
+                    <span>{{ product.farmer.farmer_profile.farm_name|default:product.farmer.username }}</span>
+                  </div>
+                  <h6 class="fw-bold mb-1">
+                    <a href="{% url 'products:detail' slug=product.slug %}" class="text-dark">{{ product.name }}</a>
+                  </h6>
+                  <div class="small text-muted mb-2">{{ product.variety|default:product.category.name }}</div>
+
+                  <div class="small text-muted mb-2">
+                    <i class="bi bi-geo-alt"></i> {{ product.farmer.city|default:"Telangana" }}
+                    {% if product.harvest_date %}
+                      • <i class="bi bi-calendar3"></i> Harvest: {{ product.harvest_date|date:"M Y" }}
+                    {% endif %}
+                  </div>
+
+                  <div class="mt-auto pt-2 border-top d-flex align-items-center justify-content-between">
+                    <div>
+                      <span class="produce-price-current">₹{{ product.price_per_unit }}</span>
+                      <small class="text-muted">/{{ product.get_unit_display }}</small>
+                      {% if product.mrp %}
+                        <span class="produce-price-mrp">₹{{ product.mrp }}</span>
+                      {% endif %}
+                    </div>
+                    <form action="{% url 'orders:add_to_cart' product.id %}" method="POST" class="d-inline">
+                      {% csrf_token %}
+                      <input type="hidden" name="quantity" value="{{ product.min_order_quantity }}">
+                      <input type="hidden" name="next" value="{{ request.get_full_path }}">
+                      <button type="submit" class="btn btn-sm btn-success rounded-pill px-3" title="Add to Cart">
+                        <i class="bi bi-cart-plus me-1"></i> Add
+                      </button>
+                    </form>
+                  </div>
+                </div>
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+
+        <!-- Pagination -->
+        {% if page_obj.has_other_pages %}
+          <div class="mt-5 d-flex justify-content-center">
+            <nav aria-label="Page navigation">
+              <ul class="pagination">
+                {% if page_obj.has_previous %}
+                  <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.previous_page_number }}">Previous</a>
+                  </li>
+                {% endif %}
+                {% for num in page_obj.paginator.page_range %}
+                  <li class="page-item {% if page_obj.number == num %}active{% endif %}">
+                    <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+                  </li>
+                {% endfor %}
+                {% if page_obj.has_next %}
+                  <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.next_page_number }}">Next</a>
+                  </li>
+                {% endif %}
+              </ul>
+            </nav>
+          </div>
+        {% endif %}
+      {% else %}
+        <div class="text-center py-5 card border-0 shadow-sm rounded-4 p-5">
+          <i class="bi bi-basket3 fs-1 text-muted mb-3"></i>
+          <h4>No farm produce found matching your criteria</h4>
+          <p class="text-muted">Try adjusting your category filter, price range, or search keyword.</p>
+          <div>
+            <a href="{% url 'products:list' %}" class="btn btn-success fw-bold">View All Produce</a>
+          </div>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}
+

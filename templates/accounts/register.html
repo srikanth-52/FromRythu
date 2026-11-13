@@ -1,0 +1,65 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Join FromRythu - Select Registration Type{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <div class="text-center mb-5">
+    <span class="badge bg-success-subtle text-success fw-bold px-3 py-2 mb-2">Join Direct Selling Revolution</span>
+    <h2 class="fw-bold">How would you like to join FromRythu?</h2>
+    <p class="text-muted">Choose your role to get started with the right portal experience.</p>
+  </div>
+
+  <div class="row justify-content-center g-4">
+    <!-- Farmer Option -->
+    <div class="col-md-5">
+      <div class="card h-100 border-0 shadow-lg rounded-4 p-4 p-md-5 text-center hover-elevate border-top border-5 border-success">
+        <div class="rounded-circle bg-success text-white mx-auto mb-4 d-flex align-items-center justify-content-center shadow" style="width: 80px; height: 80px; font-size: 2.2rem;">
+          <i class="bi bi-person-badge"></i>
+        </div>
+        <h3 class="fw-bold text-success mb-2">I am a Farmer / Rythu</h3>
+        <p class="text-muted mb-4">
+          I grow paddy, pulses, cotton, millets, fruits or vegetables. I want to sell my fresh harvest directly to households with zero mandi cuts and direct UPI/bank payouts.
+        </p>
+        <ul class="list-unstyled text-start small text-secondary mb-4">
+          <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i> Set your own selling prices</li>
+          <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i> Track live stock in & stock out</li>
+          <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i> Chat directly with customers</li>
+          <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i> Verified Rythu Badge after KYC</li>
+        </ul>
+        <a href="{% url 'accounts:register_farmer' %}" class="btn btn-success btn-lg w-100 fw-bold shadow-sm">
+          Register as Farmer <i class="bi bi-arrow-right ms-1"></i>
+        </a>
+      </div>
+    </div>
+
+    <!-- Customer Option -->
+    <div class="col-md-5">
+      <div class="card h-100 border-0 shadow-lg rounded-4 p-4 p-md-5 text-center hover-elevate border-top border-5 border-primary">
+        <div class="rounded-circle bg-primary text-white mx-auto mb-4 d-flex align-items-center justify-content-center shadow" style="width: 80px; height: 80px; font-size: 2.2rem;">
+          <i class="bi bi-bag-heart"></i>
+        </div>
+        <h3 class="fw-bold text-primary mb-2">I am a Customer / Household</h3>
+        <p class="text-muted mb-4">
+          I want pure, authentic, unadulterated food grains, pulses, and vegetables directly from trusted farmers. Transparent harvest dates, traceability, and direct savings.
+        </p>
+        <ul class="list-unstyled text-start small text-secondary mb-4">
+          <li class="mb-2"><i class="bi bi-check-circle-fill text-primary me-2"></i> Save 15-30% vs supermarket retail</li>
+          <li class="mb-2"><i class="bi bi-check-circle-fill text-primary me-2"></i> Know the farmer who grew your food</li>
+          <li class="mb-2"><i class="bi bi-check-circle-fill text-primary me-2"></i> Pay with Cash on Delivery or UPI</li>
+          <li class="mb-2"><i class="bi bi-check-circle-fill text-primary me-2"></i> Fresh morning plucks delivered to door</li>
+        </ul>
+        <a href="{% url 'accounts:register_customer' %}" class="btn btn-primary btn-lg w-100 fw-bold shadow-sm">
+          Register as Customer <i class="bi bi-arrow-right ms-1"></i>
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <div class="text-center mt-5">
+    Already registered? <a href="{% url 'accounts:farmer_login' %}" class="fw-semibold text-success me-3">Farmer Login</a> or <a href="{% url 'accounts:customer_login' %}" class="fw-semibold text-primary">Customer Login</a>
+  </div>
+</div>
+{% endblock %}
+

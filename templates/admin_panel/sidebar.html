@@ -1,0 +1,77 @@
+<div class="dashboard-sidebar" style="background-color: #1e1b4b !important;">
+  <div class="sidebar-brand">
+    <a href="{% url 'dashboard:admin_dashboard' %}">
+      <i class="bi bi-shield-lock text-danger fs-3"></i>
+      <span>FromRythu</span>
+    </a>
+    <span class="sidebar-portal-tag tag-admin">Admin Control</span>
+  </div>
+
+  <div class="sidebar-user-box">
+    <div class="sidebar-user-avatar" style="background-color: #dc2626;">
+      <i class="bi bi-person-fill-lock"></i>
+    </div>
+    <div class="overflow-hidden">
+      <div class="sidebar-user-name text-truncate">Administrator</div>
+      <div class="sidebar-user-role text-danger-subtle">Marketplace Governance</div>
+    </div>
+  </div>
+
+  <ul class="sidebar-menu">
+    <li class="sidebar-item">
+      <a href="{% url 'dashboard:admin_dashboard' %}" class="sidebar-link {% if active_tab == 'dashboard' %}active{% endif %}">
+        <i class="bi bi-speedometer2"></i> System Metrics
+      </a>
+    </li>
+    <li class="sidebar-item">
+      <a href="{% url 'dashboard:admin_farmers' %}" class="sidebar-link {% if active_tab == 'farmers' %}active{% endif %}">
+        <i class="bi bi-people"></i> Manage Farmers & KYC
+      </a>
+    </li>
+    <li class="sidebar-item">
+      <a href="{% url 'dashboard:admin_customers' %}" class="sidebar-link {% if active_tab == 'customers' %}active{% endif %}">
+        <i class="bi bi-person-hearts"></i> Customers
+      </a>
+    </li>
+    <li class="sidebar-item">
+      <a href="{% url 'dashboard:admin_products' %}" class="sidebar-link {% if active_tab == 'products' %}active{% endif %}">
+        <i class="bi bi-box-seam"></i> Products Catalog
+      </a>
+    </li>
+    <li class="sidebar-item">
+      <a href="{% url 'dashboard:admin_inventory' %}" class="sidebar-link {% if active_tab == 'inventory' %}active{% endif %}">
+        <i class="bi bi-boxes"></i> Inventory Audits
+      </a>
+    </li>
+    <li class="sidebar-item">
+      <a href="{% url 'dashboard:admin_orders' %}" class="sidebar-link {% if active_tab == 'orders' %}active{% endif %}">
+        <i class="bi bi-receipt"></i> Orders Monitoring
+      </a>
+    </li>
+    <li class="sidebar-item">
+      <a href="{% url 'dashboard:admin_prices' %}" class="sidebar-link {% if active_tab == 'prices' %}active{% endif %}">
+        <i class="bi bi-tags"></i> Price Trends Log
+      </a>
+    </li>
+    <li class="sidebar-item">
+      <a href="{% url 'dashboard:admin_messages' %}" class="sidebar-link {% if active_tab == 'messages' %}active{% endif %}">
+        <i class="bi bi-chat-dots"></i> Communications Monitor
+      </a>
+    </li>
+    <li class="sidebar-item">
+      <a href="{% url 'dashboard:admin_reports' %}" class="sidebar-link {% if active_tab == 'reports' %}active{% endif %}">
+        <i class="bi bi-graph-up-arrow"></i> Revenue & Crop Reports
+      </a>
+    </li>
+  </ul>
+
+  <div class="sidebar-footer">
+    <a href="/admin/" target="_blank" class="btn btn-outline-light btn-sm w-100 mb-2">
+      <i class="bi bi-gear me-1"></i> Django Native Admin
+    </a>
+    <a href="{% url 'accounts:logout' %}" class="btn btn-danger btn-sm w-100">
+      <i class="bi bi-box-arrow-right me-1"></i> Sign Out
+    </a>
+  </div>
+</div>
+

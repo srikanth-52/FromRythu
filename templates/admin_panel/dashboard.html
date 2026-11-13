@@ -1,0 +1,168 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Admin Dashboard - FromRythu Central Administration{% endblock %}
+
+{% block content %}
+<div class="dashboard-layout">
+  {% include 'admin_panel/sidebar.html' with active_tab='dashboard' %}
+
+  <div class="dashboard-main">
+    <div class="dashboard-header">
+      <div>
+        <h4 class="fw-bold mb-0 text-danger">
+          <i class="bi bi-shield-lock me-2"></i>Admin Management Console
+        </h4>
+        <small class="text-muted">Marketplace Health, Farmer Verification, and Platform Metrics</small>
+      </div>
+      <div class="d-flex gap-2">
+        <a href="{% url 'dashboard:admin_farmers' %}?status=pending" class="btn btn-warning btn-sm fw-bold">
+          <i class="bi bi-person-check me-1"></i> Verify Pending Farmers ({{ pending_farmers }})
+        </a>
+      </div>
+    </div>
+
+    <div class="dashboard-content-body">
+      <!-- 4 High Level Stat Cards -->
+      <div class="row g-3 mb-4">
+        <div class="col-sm-6 col-xl-3">
+          <div class="stat-card">
+            <div>
+              <div class="stat-label">Total Rythus</div>
+              <div class="stat-number text-success">{{ total_farmers }}</div>
+              <small class="text-muted">{{ verified_farmers }} verified • {{ pending_farmers }} pending</small>
+            </div>
+            <div class="stat-icon-wrapper icon-green">
+              <i class="bi bi-person-badge"></i>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-sm-6 col-xl-3">
+          <div class="stat-card">
+            <div>
+              <div class="stat-label">Active Customers</div>
+              <div class="stat-number text-primary">{{ total_customers }}</div>
+              <small class="text-muted">Registered consumer households</small>
+            </div>
+            <div class="stat-icon-wrapper icon-blue">
+              <i class="bi bi-people"></i>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-sm-6 col-xl-3">
+          <div class="stat-card">
+            <div>
+              <div class="stat-label">Produce Listed</div>
+              <div class="stat-number">{{ total_products }}</div>
+              <small class="text-success"><i class="bi bi-check-circle"></i> {{ active_products }} live on store</small>
+            </div>
+            <div class="stat-icon-wrapper icon-purple">
+              <i class="bi bi-basket"></i>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-sm-6 col-xl-3">
+          <div class="stat-card">
+            <div>
+              <div class="stat-label">Platform GMV</div>
+              <div class="stat-number text-success">₹{{ gmv|floatformat:2 }}</div>
+              <small class="text-muted">{{ total_orders }} total orders processed</small>
+            </div>
+            <div class="stat-icon-wrapper icon-orange">
+              <i class="bi bi-currency-rupee"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="row g-4">
+        <!-- Recent Platform Orders -->
+        <div class="col-lg-8">
+          <div class="card-table-wrapper">
+            <div class="card-table-header">
+              <h5 class="fw-bold mb-0">Recent Platform Transactions</h5>
+              <a href="{% url 'dashboard:admin_orders' %}" class="btn btn-sm btn-outline-danger">View All</a>
+            </div>
+            <div class="table-responsive">
+              <table class="table table-rythu">
+                <thead>
+                  <tr>
+                    <th>Order #</th>
+                    <th>Customer</th>
+                    <th>Amount</th>
+                    <th>Status</th>
+                    <th>Payment</th>
+                    <th>Date</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for order in recent_orders %}
+                    <tr>
+                      <td><strong>{{ order.order_number }}</strong></td>
+                      <td>
+                        <span class="fw-semibold">{{ order.customer.username }}</span>
+                        <div class="small text-muted">{{ order.shipping_city }}</div>
+                      </td>
+                      <td class="fw-bold text-success">₹{{ order.final_amount }}</td>
+                      <td>
+                        <span class="badge badge-status badge-status-{{ order.status }}">
+                          {{ order.get_status_display }}
+                        </span>
+                      </td>
+                      <td>
+                        <span class="badge bg-light text-dark border">
+                          {{ order.payment.payment_method|default:order.payment_status }}
+                        </span>
+                      </td>
+                      <td><small class="text-muted">{{ order.created_at|date:"M d, H:i" }}</small></td>
+                    </tr>
+                  {% empty %}
+                    <tr>
+                      <td colspan="6" class="text-center py-4 text-muted">No orders logged yet.</td>
+                    </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- Recent Registered Farmers -->
+        <div class="col-lg-4">
+          <div class="card-table-wrapper">
+            <div class="card-table-header">
+              <h5 class="fw-bold mb-0">Farmer Registrations</h5>
+              <a href="{% url 'dashboard:admin_farmers' %}" class="btn btn-sm btn-outline-success">Manage</a>
+            </div>
+            <div class="p-3">
+              {% for f in recent_farmers %}
+                <div class="d-flex align-items-center justify-content-between p-2 mb-2 bg-light rounded-3">
+                  <div>
+                    <div class="fw-bold text-dark">{{ f.farm_name }}</div>
+                    <small class="text-muted">{{ f.user.username }} • {{ f.district }}</small>
+                  </div>
+                  <div>
+                    {% if f.is_approved %}
+                      <span class="badge bg-success">Verified</span>
+                    {% else %}
+                      <form method="POST" action="{% url 'dashboard:admin_approve_farmer' f.id %}" class="d-inline">
+                        {% csrf_token %}
+                        <input type="hidden" name="action" value="approve">
+                        <button type="submit" class="btn btn-sm btn-success py-0 px-2 small">Approve</button>
+                      </form>
+                    {% endif %}
+                  </div>
+                </div>
+              {% endfor %}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+

@@ -1,0 +1,129 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}System Analytics & Crop Reports - Admin Portal{% endblock %}
+
+{% block content %}
+<div class="dashboard-layout">
+  {% include 'admin_panel/sidebar.html' with active_tab='reports' %}
+
+  <div class="dashboard-main">
+    <div class="dashboard-header">
+      <div>
+        <h4 class="fw-bold mb-0 text-danger">
+          <i class="bi bi-graph-up-arrow me-2"></i>Platform Revenue & Produce Reports
+        </h4>
+        <small class="text-muted">Analyze sales performance, leading produce categories, and top-performing farmers</small>
+      </div>
+      <div>
+        <span class="badge bg-success fs-6 p-2">Total Platform Sales: ₹{{ total_revenue|floatformat:2 }}</span>
+      </div>
+    </div>
+
+    <div class="dashboard-content-body">
+      <div class="row g-4 mb-4">
+        <!-- Category Sales Breakdown -->
+        <div class="col-lg-6">
+          <div class="card-table-wrapper h-100">
+            <div class="card-table-header">
+              <h5 class="fw-bold mb-0"><i class="bi bi-pie-chart me-1"></i> Sales by Crop Category</h5>
+            </div>
+            <div class="table-responsive">
+              <table class="table table-rythu">
+                <thead>
+                  <tr>
+                    <th>Category</th>
+                    <th>Units Sold</th>
+                    <th>Gross Revenue</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for cat in cat_sales %}
+                    <tr>
+                      <td><strong>{{ cat.product__category__name|default:"Uncategorized" }}</strong></td>
+                      <td>{{ cat.total_items }} units</td>
+                      <td class="fw-bold text-success">₹{{ cat.total_revenue|floatformat:2 }}</td>
+                    </tr>
+                  {% empty %}
+                    <tr>
+                      <td colspan="3" class="text-center py-4 text-muted">No category sales recorded yet.</td>
+                    </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- Top Selling Produce -->
+        <div class="col-lg-6">
+          <div class="card-table-wrapper h-100">
+            <div class="card-table-header">
+              <h5 class="fw-bold mb-0"><i class="bi bi-trophy me-1 text-warning"></i> Top 10 Best Selling Produce</h5>
+            </div>
+            <div class="table-responsive">
+              <table class="table table-rythu">
+                <thead>
+                  <tr>
+                    <th>Produce</th>
+                    <th>Units Sold</th>
+                    <th>Total Revenue</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for p in top_products %}
+                    <tr>
+                      <td><strong>{{ p.product_name }}</strong></td>
+                      <td>{{ p.units_sold }} {{ p.unit }}</td>
+                      <td class="fw-bold text-success">₹{{ p.revenue|floatformat:2 }}</td>
+                    </tr>
+                  {% empty %}
+                    <tr>
+                      <td colspan="3" class="text-center py-4 text-muted">No produce sales yet.</td>
+                    </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Top Performing Rythus -->
+      <div class="card-table-wrapper">
+        <div class="card-table-header">
+          <h5 class="fw-bold mb-0"><i class="bi bi-person-lines-fill me-1 text-primary"></i> Top Performing Rythus & Farms</h5>
+          <span class="badge bg-light text-muted border">Direct Monetization</span>
+        </div>
+        <div class="table-responsive">
+          <table class="table table-rythu">
+            <thead>
+              <tr>
+                <th>Farmer Username</th>
+                <th>Farm Enterprise</th>
+                <th>Orders Fulfilled</th>
+                <th>Farmer Gross Payout</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for f in top_farmers %}
+                <tr>
+                  <td><strong>@{{ f.farmer__username }}</strong></td>
+                  <td>{{ f.farmer__farmer_profile__farm_name|default:"Independent Farm" }}</td>
+                  <td><span class="badge bg-light text-dark border">{{ f.total_orders }} orders</span></td>
+                  <td class="fw-bold text-success fs-6">₹{{ f.revenue|floatformat:2 }}</td>
+                </tr>
+              {% empty %}
+                <tr>
+                  <td colspan="4" class="text-center py-4 text-muted">No farmer revenue records yet.</td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+

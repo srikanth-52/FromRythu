@@ -1,0 +1,232 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ product.name }} - Direct from {{ product.farmer.farmer_profile.farm_name|default:product.farmer.username }}{% endblock %}
+
+{% block content %}
+<div class="bg-light py-3 border-bottom mb-4">
+  <div class="container">
+    <nav aria-label="breadcrumb">
+      <ol class="breadcrumb mb-0 small">
+        <li class="breadcrumb-item"><a href="{% url 'home' %}">Home</a></li>
+        <li class="breadcrumb-item"><a href="{% url 'products:list' %}">Catalog</a></li>
+        <li class="breadcrumb-item"><a href="{% url 'products:list' %}?category={{ product.category.slug }}">{{ product.category.name }}</a></li>
+        <li class="breadcrumb-item active" aria-current="page">{{ product.name }}</li>
+      </ol>
+    </nav>
+  </div>
+</div>
+
+<div class="container mb-5">
+  <div class="row g-4">
+    <!-- Produce Images & Highlights -->
+    <div class="col-lg-6">
+      <div class="card border-0 shadow-sm rounded-4 overflow-hidden mb-4">
+        <img src="{{ product.display_image }}" alt="{{ product.name }}" class="w-100" style="max-height: 440px; object-fit: cover;">
+      </div>
+
+      <!-- Farmer Profile Box -->
+      <div class="card border-0 shadow-sm rounded-4 p-4 bg-white">
+        <div class="d-flex align-items-center justify-content-between mb-3 pb-2 border-bottom">
+          <span class="badge bg-success-subtle text-success fw-bold p-2"><i class="bi bi-patch-check-fill me-1"></i> Verified Farm Source</span>
+          <small class="text-muted">Direct Farmer Contact</small>
+        </div>
+
+        <div class="d-flex align-items-center gap-3 mb-3">
+          <div class="rounded-circle bg-success text-white fw-bold d-flex align-items-center justify-content-center shadow" style="width: 58px; height: 58px; font-size: 1.5rem;">
+            {{ product.farmer.first_name|first|default:product.farmer.username|first|upper }}
+          </div>
+          <div>
+            <h5 class="fw-bold mb-0">{{ farmer_profile.farm_name|default:product.farmer.username }}</h5>
+            <div class="small text-muted">
+              Farmer: <strong>{{ product.farmer.get_full_name|default:product.farmer.username }}</strong> • {{ product.farmer.city|default:"Telangana" }}
+            </div>
+            <div class="small text-success"><i class="bi bi-tree"></i> {{ farmer_profile.farming_type|default:"Natural Farming" }} • {{ farmer_profile.farming_experience_years|default:5 }}+ Years Experience</div>
+          </div>
+        </div>
+
+        <p class="small text-secondary mb-3">{{ farmer_profile.bio|default:"Dedicated local farmer practicing soil regenerative and natural techniques." }}</p>
+
+        <!-- Chat with Farmer Trigger -->
+        <button type="button" class="btn btn-outline-success w-100 fw-semibold" data-bs-toggle="modal" data-bs-target="#chatModal">
+          <i class="bi bi-chat-dots-fill me-2"></i> Message Farmer Directly
+        </button>
+      </div>
+    </div>
+
+    <!-- Product Purchase & Details -->
+    <div class="col-lg-6">
+      <div class="card border-0 shadow-sm rounded-4 p-4 p-md-5 bg-white">
+        <div class="d-flex align-items-center gap-2 mb-2">
+          <span class="badge bg-light text-dark border">{{ product.category.name }}</span>
+          {% if product.is_organic %}
+            <span class="badge bg-success-subtle text-success"><i class="bi bi-patch-check-fill me-1"></i> Certified Organic</span>
+          {% endif %}
+          {% if product.direct_savings_percentage > 0 %}
+            <span class="badge bg-danger-subtle text-danger fw-bold">Save {{ product.direct_savings_percentage }}% Direct</span>
+          {% endif %}
+        </div>
+
+        <h2 class="fw-bold text-dark mb-2">{{ product.name }}</h2>
+        <p class="text-muted small mb-3">
+          <strong>Seed Variety:</strong> {{ product.variety|default:"Indigenous / Desi Standard" }} 
+          {% if product.harvest_date %}
+            • <strong>Harvested:</strong> {{ product.harvest_date|date:"F d, Y" }}
+          {% endif %}
+        </p>
+
+        <!-- Price Display -->
+        <div class="p-3 bg-light rounded-4 mb-4 d-flex align-items-baseline gap-3">
+          <div>
+            <span class="fs-2 fw-bolder text-success">₹{{ product.price_per_unit }}</span>
+            <span class="text-muted fw-semibold">/ {{ product.get_unit_display }}</span>
+          </div>
+          {% if product.mrp %}
+            <div class="text-muted text-decoration-line-through">Mkt Retail: ₹{{ product.mrp }}</div>
+          {% endif %}
+        </div>
+
+        <!-- Stock Availability Status -->
+        <div class="mb-4">
+          <div class="d-flex justify-content-between small fw-bold mb-1">
+            <span>Harvest Stock Available:</span>
+            <span class="{% if product.available_stock > 20 %}text-success{% else %}text-danger{% endif %}">
+              {{ product.available_stock }} {{ product.unit }} left in farm storage
+            </span>
+          </div>
+          <div class="progress" style="height: 8px;">
+            <div class="progress-bar {% if product.available_stock > 20 %}bg-success{% else %}bg-warning{% endif %}" role="progressbar" style="width: {% if product.available_stock > 100 %}100%{% else %}{{ product.available_stock }}%{% endif %};"></div>
+          </div>
+        </div>
+
+        <!-- Add to Cart Form -->
+        {% if product.available_stock > 0 %}
+          <form action="{% url 'orders:add_to_cart' product.id %}" method="POST" class="mb-4">
+            {% csrf_token %}
+            <div class="row g-3 align-items-center mb-3">
+              <div class="col-sm-4">
+                <label class="form-label fw-semibold small">Quantity ({{ product.get_unit_display }}):</label>
+                <input type="number" name="quantity" class="form-control" value="{{ product.min_order_quantity }}" min="{{ product.min_order_quantity }}" max="{{ product.available_stock }}" step="0.5" required>
+              </div>
+              <div class="col-sm-8 pt-sm-4">
+                <button type="submit" class="btn btn-success btn-lg w-100 fw-bold shadow">
+                  <i class="bi bi-cart3 me-2"></i> Add to Cart
+                </button>
+              </div>
+            </div>
+            <small class="text-muted d-block">
+              <i class="bi bi-info-circle me-1"></i> Min order: {{ product.min_order_quantity }} {{ product.unit }}. Zero commission direct transaction.
+            </small>
+          </form>
+        {% else %}
+          <div class="alert alert-danger py-3 mb-4">
+            <i class="bi bi-x-circle me-1"></i> Currently Out of Stock. Farmer will update upon next fresh harvest.
+          </div>
+        {% endif %}
+
+        <!-- Produce Description -->
+        <div class="mb-4">
+          <h5 class="fw-bold border-bottom pb-2">Harvest & Soil Description</h5>
+          <p class="text-secondary" style="white-space: pre-line;">{{ product.description }}</p>
+        </div>
+
+        <!-- Price History Transparency -->
+        {% if price_logs %}
+          <div class="mb-4 p-3 bg-light rounded-4">
+            <h6 class="fw-bold mb-2 text-dark"><i class="bi bi-graph-up me-1 text-success"></i> Transparent Price Log</h6>
+            <ul class="list-unstyled small mb-0">
+              {% for log in price_logs %}
+                <li class="d-flex justify-content-between py-1 border-bottom text-muted">
+                  <span>{{ log.created_at|date:"M d, Y" }} - {{ log.reason|default:"Yield adjustment" }}</span>
+                  <strong>₹{{ log.new_price }}</strong>
+                </li>
+              {% endfor %}
+            </ul>
+          </div>
+        {% endif %}
+
+        <!-- Reviews Section -->
+        <div class="mt-4 pt-3 border-top">
+          <h5 class="fw-bold mb-3"><i class="bi bi-star-fill text-warning me-1"></i> Customer Verified Reviews ({{ reviews.count }})</h5>
+          
+          {% if user.is_authenticated and user.is_customer %}
+            <div class="p-3 bg-light rounded-4 mb-4">
+              <h6 class="fw-bold mb-2">Write a Review for {{ product.name }}</h6>
+              <form method="POST">
+                {% csrf_token %}
+                <div class="mb-2">
+                  <label class="form-label small fw-semibold">Rating:</label>
+                  <select name="rating" class="form-select form-select-sm" style="width: 140px;">
+                    <option value="5">★★★★★ (5 Stars)</option>
+                    <option value="4">★★★★☆ (4 Stars)</option>
+                    <option value="3">★★★☆☆ (3 Stars)</option>
+                    <option value="2">★★☆☆☆ (2 Stars)</option>
+                    <option value="1">★☆☆☆☆ (1 Star)</option>
+                  </select>
+                </div>
+                <div class="mb-2">
+                  <textarea name="comment" class="form-control form-control-sm" rows="2" placeholder="Share your experience regarding freshness, cooking, taste..." required></textarea>
+                </div>
+                <button type="submit" class="btn btn-sm btn-success fw-bold">Submit Review</button>
+              </form>
+            </div>
+          {% endif %}
+
+          <div class="reviews-list">
+            {% for r in reviews %}
+              <div class="p-3 mb-2 bg-light rounded-3">
+                <div class="d-flex justify-content-between align-items-center mb-1">
+                  <strong>{{ r.customer.first_name|default:r.customer.username }}</strong>
+                  <span class="text-warning small">
+                    {% for i in "12345" %}
+                      {% if forloop.counter <= r.rating %}★{% else %}☆{% endif %}
+                    {% endfor %}
+                  </span>
+                </div>
+                <p class="small text-secondary mb-0">{{ r.comment }}</p>
+                <small class="text-muted" style="font-size: 0.72rem;">{{ r.created_at|date:"M d, Y" }}</small>
+              </div>
+            {% empty %}
+              <p class="text-muted small">No reviews written yet. Be the first household to review this harvest!</p>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Chat with Farmer Modal -->
+<div class="modal fade" id="chatModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content rounded-4 border-0 shadow">
+      <div class="modal-header bg-success text-white">
+        <h5 class="modal-title fw-bold">Message Farmer: {{ product.farmer.get_full_name|default:product.farmer.username }}</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <form method="POST" action="{% url 'messaging:send' %}">
+        {% csrf_token %}
+        <div class="modal-body p-4">
+          <input type="hidden" name="receiver_id" value="{{ product.farmer.id }}">
+          <input type="hidden" name="product_id" value="{{ product.id }}">
+
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Regarding Produce:</label>
+            <input type="text" class="form-control" value="{{ product.name }}" readonly>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Your Question or Inquiry *</label>
+            <textarea name="content" class="form-control" rows="4" placeholder="e.g. Namaste! How old is this harvest? Can you pack in 50kg bags?" required></textarea>
+          </div>
+        </div>
+        <div class="modal-footer bg-light">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-success fw-bold px-4">Send Message Directly</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}
+

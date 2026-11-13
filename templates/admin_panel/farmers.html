@@ -1,0 +1,101 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Manage Farmers & KYC Verification - Admin Portal{% endblock %}
+
+{% block content %}
+<div class="dashboard-layout">
+  {% include 'admin_panel/sidebar.html' with active_tab='farmers' %}
+
+  <div class="dashboard-main">
+    <div class="dashboard-header">
+      <div>
+        <h4 class="fw-bold mb-0 text-danger">
+          <i class="bi bi-people me-2"></i>Rythu Verification & Management
+        </h4>
+        <small class="text-muted">Verify farmer documents, farm size, farming methods, and approve marketplace store access</small>
+      </div>
+      <div class="d-flex gap-2">
+        <a href="{% url 'dashboard:admin_farmers' %}" class="btn btn-sm {% if not status_filter %}btn-danger{% else %}btn-outline-secondary{% endif %}">All Rythus</a>
+        <a href="{% url 'dashboard:admin_farmers' %}?status=pending" class="btn btn-sm {% if status_filter == 'pending' %}btn-warning text-dark{% else %}btn-outline-warning text-dark{% endif %}">Pending Verification</a>
+        <a href="{% url 'dashboard:admin_farmers' %}?status=approved" class="btn btn-sm {% if status_filter == 'approved' %}btn-success{% else %}btn-outline-success{% endif %}">Approved</a>
+      </div>
+    </div>
+
+    <div class="dashboard-content-body">
+      <div class="card-table-wrapper">
+        <div class="table-responsive">
+          <table class="table table-rythu">
+            <thead>
+              <tr>
+                <th>Farm & Farmer Name</th>
+                <th>Location</th>
+                <th>Farm Area</th>
+                <th>Crops Cultivated</th>
+                <th>Farming Type</th>
+                <th>Direct UPI / Payout</th>
+                <th>Verification</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for f in farmers %}
+                <tr>
+                  <td>
+                    <div class="fw-bold fs-6 text-dark">{{ f.farm_name }}</div>
+                    <small class="text-muted">{{ f.user.get_full_name|default:f.user.username }} ({{ f.user.phone_number }})</small>
+                  </td>
+                  <td>
+                    <div>{{ f.district }}, {{ f.state }}</div>
+                    <small class="text-muted">{{ f.village|default:"-" }}</small>
+                  </td>
+                  <td>
+                    <span class="badge bg-light text-dark border">{{ f.farm_size_acres }} Acres</span>
+                  </td>
+                  <td>
+                    <span class="small text-secondary">{{ f.primary_crops }}</span>
+                  </td>
+                  <td>
+                    <span class="badge bg-success-subtle text-success">{{ f.farming_type }}</span>
+                  </td>
+                  <td>
+                    <small class="fw-semibold text-primary">{{ f.upi_id|default:"Pending details" }}</small>
+                  </td>
+                  <td>
+                    {% if f.is_approved %}
+                      <span class="badge bg-success"><i class="bi bi-patch-check-fill me-1"></i> Verified</span>
+                    {% else %}
+                      <span class="badge bg-warning text-dark"><i class="bi bi-clock-history me-1"></i> Pending KYC</span>
+                    {% endif %}
+                  </td>
+                  <td>
+                    <form method="POST" action="{% url 'dashboard:admin_approve_farmer' f.id %}">
+                      {% csrf_token %}
+                      {% if not f.is_approved %}
+                        <input type="hidden" name="action" value="approve">
+                        <button type="submit" class="btn btn-sm btn-success fw-bold">
+                          <i class="bi bi-check-lg"></i> Approve
+                        </button>
+                      {% else %}
+                        <input type="hidden" name="action" value="revoke">
+                        <button type="submit" class="btn btn-sm btn-outline-danger">
+                          Revoke
+                        </button>
+                      {% endif %}
+                    </form>
+                  </td>
+                </tr>
+              {% empty %}
+                <tr>
+                  <td colspan="8" class="text-center py-5 text-muted">No farmers matching criteria.</td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+

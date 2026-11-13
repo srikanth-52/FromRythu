@@ -1,0 +1,92 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Orders Monitoring - Admin Portal{% endblock %}
+
+{% block content %}
+<div class="dashboard-layout">
+  {% include 'admin_panel/sidebar.html' with active_tab='orders' %}
+
+  <div class="dashboard-main">
+    <div class="dashboard-header">
+      <div>
+        <h4 class="fw-bold mb-0 text-danger">
+          <i class="bi bi-receipt me-2"></i>Platform Orders Monitoring
+        </h4>
+        <small class="text-muted">Real-time supervision of all customer purchases, payments, and farmer dispatches</small>
+      </div>
+      <div class="d-flex gap-2">
+        <a href="{% url 'dashboard:admin_orders' %}" class="btn btn-sm {% if not status_filter %}btn-danger{% else %}btn-outline-secondary{% endif %}">All</a>
+        <a href="{% url 'dashboard:admin_orders' %}?status=pending" class="btn btn-sm {% if status_filter == 'pending' %}btn-warning text-dark{% else %}btn-outline-warning text-dark{% endif %}">Pending</a>
+        <a href="{% url 'dashboard:admin_orders' %}?status=accepted" class="btn btn-sm {% if status_filter == 'accepted' %}btn-primary{% else %}btn-outline-primary{% endif %}">Accepted</a>
+        <a href="{% url 'dashboard:admin_orders' %}?status=shipped" class="btn btn-sm {% if status_filter == 'shipped' %}btn-info text-white{% else %}btn-outline-info{% endif %}">Shipped</a>
+        <a href="{% url 'dashboard:admin_orders' %}?status=delivered" class="btn btn-sm {% if status_filter == 'delivered' %}btn-success{% else %}btn-outline-success{% endif %}">Delivered</a>
+      </div>
+    </div>
+
+    <div class="dashboard-content-body">
+      <div class="card-table-wrapper">
+        <div class="table-responsive">
+          <table class="table table-rythu">
+            <thead>
+              <tr>
+                <th>Order # & Time</th>
+                <th>Customer Name</th>
+                <th>Delivery Destination</th>
+                <th>Items Ordered</th>
+                <th>Amount</th>
+                <th>Payment</th>
+                <th>Order Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for o in orders %}
+                <tr>
+                  <td>
+                    <div class="fw-bold fs-6 text-dark">{{ o.order_number }}</div>
+                    <small class="text-muted">{{ o.created_at|date:"M d, Y H:i" }}</small>
+                  </td>
+                  <td>
+                    <div class="fw-bold text-dark">{{ o.customer.get_full_name|default:o.customer.username }}</div>
+                    <small class="text-muted">{{ o.shipping_phone }}</small>
+                  </td>
+                  <td>
+                    <div>{{ o.shipping_city }}</div>
+                    <small class="text-muted">{{ o.shipping_pincode }}</small>
+                  </td>
+                  <td>
+                    {% for item in o.items.all %}
+                      <div class="small">
+                        {{ item.product_name }} ({{ item.quantity }} {{ item.unit }})
+                      </div>
+                    {% endfor %}
+                  </td>
+                  <td>
+                    <strong class="text-success fs-6">₹{{ o.final_amount|floatformat:2 }}</strong>
+                  </td>
+                  <td>
+                    <span class="badge {% if o.payment_status == 'completed' %}bg-success-subtle text-success{% else %}bg-warning-subtle text-warning{% endif %}">
+                      {{ o.get_payment_status_display }}
+                    </span>
+                    <div class="small text-muted">{{ o.payment.payment_method|default:"COD" }}</div>
+                  </td>
+                  <td>
+                    <span class="badge badge-status badge-status-{{ o.status }}">
+                      {{ o.get_status_display }}
+                    </span>
+                  </td>
+                </tr>
+              {% empty %}
+                <tr>
+                  <td colspan="7" class="text-center py-5 text-muted">No orders found.</td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+

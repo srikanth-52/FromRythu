@@ -1,0 +1,72 @@
+<div class="dashboard-sidebar">
+  <div class="sidebar-brand">
+    <a href="{% url 'farmers:dashboard' %}">
+      <i class="bi bi-flower1 text-success fs-3"></i>
+      <span>FromRythu</span>
+    </a>
+    <span class="sidebar-portal-tag tag-farmer">Rythu Portal</span>
+  </div>
+
+  <div class="sidebar-user-box">
+    <div class="sidebar-user-avatar">
+      {{ user.first_name|first|default:user.username|first|upper }}
+    </div>
+    <div class="overflow-hidden">
+      <div class="sidebar-user-name text-truncate">{{ user.farmer_profile.farm_name|default:user.username }}</div>
+      <div class="sidebar-user-role"><i class="bi bi-geo-alt"></i> {{ user.city|default:"Telangana" }}</div>
+    </div>
+  </div>
+
+  <ul class="sidebar-menu">
+    <li class="sidebar-item">
+      <a href="{% url 'farmers:dashboard' %}" class="sidebar-link {% if active_tab == 'dashboard' %}active{% endif %}">
+        <i class="bi bi-speedometer2"></i> Dashboard
+      </a>
+    </li>
+    <li class="sidebar-item">
+      <a href="{% url 'farmers:add_product' %}" class="sidebar-link {% if active_tab == 'add_product' %}active{% endif %}">
+        <i class="bi bi-plus-circle"></i> Add Produce / Harvest
+      </a>
+    </li>
+    <li class="sidebar-item">
+      <a href="{% url 'farmers:manage_products' %}" class="sidebar-link {% if active_tab == 'manage_products' %}active{% endif %}">
+        <i class="bi bi-box-seam"></i> Manage Produce
+      </a>
+    </li>
+    <li class="sidebar-item">
+      <a href="{% url 'farmers:stock' %}" class="sidebar-link {% if active_tab == 'stock' %}active{% endif %}">
+        <i class="bi bi-boxes"></i> Stock In / Stock Out
+      </a>
+    </li>
+    <li class="sidebar-item">
+      <a href="{% url 'farmers:price' %}" class="sidebar-link {% if active_tab == 'price' %}active{% endif %}">
+        <i class="bi bi-tags"></i> Direct Selling Prices
+      </a>
+    </li>
+    <li class="sidebar-item">
+      <a href="{% url 'farmers:orders' %}" class="sidebar-link {% if active_tab == 'orders' %}active{% endif %}">
+        <i class="bi bi-receipt"></i> Orders Received
+      </a>
+    </li>
+    <li class="sidebar-item">
+      <a href="{% url 'farmers:messages' %}" class="sidebar-link {% if active_tab == 'messages' %}active{% endif %}">
+        <i class="bi bi-chat-dots"></i> Customer Messages
+      </a>
+    </li>
+    <li class="sidebar-item">
+      <a href="{% url 'farmers:sales_report' %}" class="sidebar-link {% if active_tab == 'reports' %}active{% endif %}">
+        <i class="bi bi-bar-chart-line"></i> Sales Reports
+      </a>
+    </li>
+  </ul>
+
+  <div class="sidebar-footer">
+    <a href="{% url 'home' %}" class="btn btn-outline-light btn-sm w-100 mb-2">
+      <i class="bi bi-shop me-1"></i> Visit Public Store
+    </a>
+    <a href="{% url 'accounts:logout' %}" class="btn btn-danger btn-sm w-100">
+      <i class="bi bi-box-arrow-right me-1"></i> Sign Out
+    </a>
+  </div>
+</div>
+

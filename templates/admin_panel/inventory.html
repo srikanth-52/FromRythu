@@ -1,0 +1,75 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Inventory & Stock Audits - Admin Portal{% endblock %}
+
+{% block content %}
+<div class="dashboard-layout">
+  {% include 'admin_panel/sidebar.html' with active_tab='inventory' %}
+
+  <div class="dashboard-main">
+    <div class="dashboard-header">
+      <div>
+        <h4 class="fw-bold mb-0 text-danger">
+          <i class="bi bi-boxes me-2"></i>Marketplace Inventory Audit Logs
+        </h4>
+        <small class="text-muted">Track all harvest inward and fulfillment outward movements across all farms</small>
+      </div>
+    </div>
+
+    <div class="dashboard-content-body">
+      <div class="card-table-wrapper">
+        <div class="card-table-header">
+          <h5 class="fw-bold mb-0">Unified Stock Ledger</h5>
+          <span class="badge bg-light text-muted border">Platform Audit Trail</span>
+        </div>
+        <div class="table-responsive">
+          <table class="table table-rythu">
+            <thead>
+              <tr>
+                <th>Timestamp</th>
+                <th>Produce Name</th>
+                <th>Farmer Source</th>
+                <th>Movement Type</th>
+                <th>Quantity</th>
+                <th>Batch / Reference</th>
+                <th>Notes</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for r in records %}
+                <tr>
+                  <td><small class="text-muted">{{ r.created_at|date:"M d, Y H:i" }}</small></td>
+                  <td><strong>{{ r.product.name }}</strong></td>
+                  <td>
+                    <span class="badge bg-light text-dark border">{{ r.product.farmer.username }}</span>
+                  </td>
+                  <td>
+                    {% if r.transaction_type == 'IN' %}
+                      <span class="badge bg-success-subtle text-success"><i class="bi bi-arrow-down-left"></i> INWARD</span>
+                    {% else %}
+                      <span class="badge bg-danger-subtle text-danger"><i class="bi bi-arrow-up-right"></i> OUTWARD</span>
+                    {% endif %}
+                  </td>
+                  <td>
+                    <strong class="{% if r.transaction_type == 'IN' %}text-success{% else %}text-danger{% endif %}">
+                      {% if r.transaction_type == 'IN' %}+{% else %}-{% endif %}{{ r.quantity }} {{ r.product.unit }}
+                    </strong>
+                  </td>
+                  <td><small class="text-muted">{{ r.batch_no|default:"-" }}</small></td>
+                  <td><small class="text-secondary">{{ r.notes|default:"-" }}</small></td>
+                </tr>
+              {% empty %}
+                <tr>
+                  <td colspan="7" class="text-center py-5 text-muted">No stock movements found.</td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+

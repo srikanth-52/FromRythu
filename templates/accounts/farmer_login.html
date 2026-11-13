@@ -1,0 +1,64 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Farmer Portal Login - FromRythu{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-md-6 col-lg-5">
+      <div class="card border-0 shadow-lg rounded-4 overflow-hidden">
+        <div class="p-4 text-center text-white" style="background: linear-gradient(135deg, #1b4332 0%, #2d6a4f 100%);">
+          <div class="rounded-circle bg-white text-success mx-auto mb-3 d-flex align-items-center justify-content-center" style="width: 64px; height: 64px; font-size: 2rem;">
+            <i class="bi bi-person-badge"></i>
+          </div>
+          <h3 class="fw-bold mb-1">Farmer Portal</h3>
+          <p class="small text-light opacity-90 mb-0">Sign in to manage your harvests, inventory, prices & orders</p>
+        </div>
+
+        <div class="card-body p-4 p-md-5">
+          <form method="POST" action="{% url 'accounts:farmer_login' %}" class="needs-validation" novalidate>
+            {% csrf_token %}
+
+            <div class="mb-3">
+              <label class="form-label fw-semibold" for="id_username">Farmer Username</label>
+              <div class="input-group">
+                <span class="input-group-text bg-light"><i class="bi bi-person"></i></span>
+                <input type="text" name="username" class="form-control" id="id_username" placeholder="e.g. farmer_ramesh" required autofocus>
+              </div>
+            </div>
+
+            <div class="mb-4">
+              <div class="d-flex justify-content-between">
+                <label class="form-label fw-semibold" for="id_password">Password</label>
+                <a href="#" class="small text-success text-decoration-none">Forgot Password?</a>
+              </div>
+              <div class="input-group">
+                <span class="input-group-text bg-light"><i class="bi bi-lock"></i></span>
+                <input type="password" name="password" class="form-control" id="id_password" placeholder="••••••••" required>
+              </div>
+            </div>
+
+            <button type="submit" class="btn btn-rythu w-100 py-2 fs-6 fw-bold shadow-sm mb-3">
+              <i class="bi bi-box-arrow-in-right me-1"></i> Access Farmer Dashboard
+            </button>
+          </form>
+
+          <div class="p-3 bg-light rounded-3 text-center small mb-3">
+            <strong>Demo Farmer Credentials:</strong><br>
+            Username: <code class="text-success">farmer_ramesh</code> | Password: <code>farmer123</code>
+          </div>
+
+          <div class="text-center small">
+            New farmer? <a href="{% url 'accounts:register_farmer' %}" class="text-success fw-bold text-decoration-underline">Register your farm here</a>
+            <div class="mt-2 text-muted">
+              Looking for Customer Login? <a href="{% url 'accounts:customer_login' %}" class="text-primary fw-semibold">Click here</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+

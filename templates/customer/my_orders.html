@@ -1,0 +1,81 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}My Direct Farm Orders - FromRythu{% endblock %}
+
+{% block content %}
+<div class="dashboard-layout">
+  {% include 'customer/sidebar.html' with active_tab='orders' %}
+
+  <div class="dashboard-main">
+    <div class="dashboard-header">
+      <div>
+        <h4 class="fw-bold mb-0 text-primary">
+          <i class="bi bi-receipt me-2"></i>My Farm Orders & Tracking
+        </h4>
+        <small class="text-muted">Track the fresh harvest, packing, and dispatch progress of your orders</small>
+      </div>
+      <a href="{% url 'products:list' %}" class="btn btn-outline-primary btn-sm">
+        <i class="bi bi-cart-plus me-1"></i> Order More Fresh Produce
+      </a>
+    </div>
+
+    <div class="dashboard-content-body">
+      {% for order in orders %}
+        <div class="card border-0 shadow-sm rounded-4 p-4 mb-4 bg-white">
+          <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-3 pb-3 border-bottom gap-2">
+            <div>
+              <span class="badge bg-light text-dark border me-2">Order #{{ order.order_number }}</span>
+              <small class="text-muted"><i class="bi bi-calendar3"></i> {{ order.created_at|date:"F d, Y, h:i A" }}</small>
+            </div>
+            <div class="d-flex align-items-center gap-2">
+              <span class="badge badge-status badge-status-{{ order.status }}">
+                {{ order.get_status_display }}
+              </span>
+              <a href="{% url 'customers:order_detail' order.order_number %}" class="btn btn-sm btn-outline-primary">
+                View Tracking & Invoice
+              </a>
+            </div>
+          </div>
+
+          <!-- Items Row -->
+          <div class="row g-3">
+            <div class="col-md-8">
+              {% for item in order.items.all %}
+                <div class="d-flex align-items-center justify-content-between py-2 border-bottom">
+                  <div>
+                    <h6 class="fw-bold mb-0 text-dark">{{ item.product_name }}</h6>
+                    <small class="text-muted">Qty: {{ item.quantity }} {{ item.unit }} • Rythu: {{ item.farmer.farmer_profile.farm_name|default:item.farmer.username }}</small>
+                  </div>
+                  <strong class="text-success">₹{{ item.subtotal|floatformat:2 }}</strong>
+                </div>
+              {% endfor %}
+            </div>
+            <div class="col-md-4 border-start-md ps-md-4">
+              <div class="small text-muted mb-1">Delivering to:</div>
+              <div class="fw-semibold text-dark small mb-2">{{ order.shipping_full_name }}</div>
+              <div class="small text-secondary mb-3">{{ order.shipping_address }}, {{ order.shipping_city }} - {{ order.shipping_pincode }}</div>
+              <div class="d-flex justify-content-between small">
+                <span class="text-muted">Total Paid:</span>
+                <strong class="text-success fs-6">₹{{ order.final_amount|floatformat:2 }}</strong>
+              </div>
+            </div>
+          </div>
+        </div>
+      {% empty %}
+        <div class="card border-0 shadow-sm rounded-4 p-5 text-center bg-white">
+          <i class="bi bi-inbox fs-1 text-muted mb-3"></i>
+          <h4>No orders placed yet</h4>
+          <p class="text-muted">Support our local farmers and enjoy freshly plucked vegetables and single-origin rice.</p>
+          <div>
+            <a href="{% url 'products:list' %}" class="btn btn-success fw-bold px-4">
+              <i class="bi bi-shop me-1"></i> Start Shopping
+            </a>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+{% endblock %}
+

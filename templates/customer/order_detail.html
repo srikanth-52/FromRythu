@@ -1,0 +1,143 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Order #{{ order.order_number }} Details - FromRythu{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+      <a href="{% url 'customers:my_orders' %}" class="small text-muted text-decoration-none">
+        <i class="bi bi-arrow-left me-1"></i> Back to My Orders
+      </a>
+      <h3 class="fw-bold text-dark mt-1">Order Summary: #{{ order.order_number }}</h3>
+      <span class="text-muted small">Placed on {{ order.created_at|date:"F d, Y, h:i A" }}</span>
+    </div>
+    <span class="badge badge-status badge-status-{{ order.status }} fs-6 p-2">
+      {{ order.get_status_display }}
+    </span>
+  </div>
+
+  <!-- Progress Tracker Flowchart -->
+  <div class="card border-0 shadow-sm rounded-4 p-4 bg-white mb-4">
+    <h5 class="fw-bold mb-4 text-success"><i class="bi bi-truck me-2"></i> Harvest & Delivery Progress</h5>
+    <div class="row text-center g-3">
+      <div class="col">
+        <div class="p-2 {% if order.status in 'pending accepted packed shipped delivered' %}text-success fw-bold{% else %}text-muted{% endif %}">
+          <i class="bi bi-check-circle-fill fs-3 d-block mb-1"></i>
+          <small>Order Placed</small>
+        </div>
+      </div>
+      <div class="col">
+        <div class="p-2 {% if order.status in 'accepted packed shipped delivered' %}text-success fw-bold{% else %}text-muted{% endif %}">
+          <i class="bi bi-check-circle-fill fs-3 d-block mb-1"></i>
+          <small>Accepted by Rythu</small>
+        </div>
+      </div>
+      <div class="col">
+        <div class="p-2 {% if order.status in 'packed shipped delivered' %}text-success fw-bold{% else %}text-muted{% endif %}">
+          <i class="bi bi-check-circle-fill fs-3 d-block mb-1"></i>
+          <small>Fresh Plucked & Packed</small>
+        </div>
+      </div>
+      <div class="col">
+        <div class="p-2 {% if order.status in 'shipped delivered' %}text-success fw-bold{% else %}text-muted{% endif %}">
+          <i class="bi bi-truck fs-3 d-block mb-1"></i>
+          <small>Dispatched / Transit</small>
+        </div>
+      </div>
+      <div class="col">
+        <div class="p-2 {% if order.status == 'delivered' %}text-success fw-bold{% else %}text-muted{% endif %}">
+          <i class="bi bi-house-door-fill fs-3 d-block mb-1"></i>
+          <small>Delivered to Door</small>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row g-4">
+    <!-- Items Table -->
+    <div class="col-lg-8">
+      <div class="card border-0 shadow-sm rounded-4 overflow-hidden bg-white">
+        <div class="p-3 bg-light border-bottom fw-bold">Items in this Delivery</div>
+        <div class="table-responsive">
+          <table class="table table-rythu">
+            <thead>
+              <tr>
+                <th>Produce</th>
+                <th>Rythu / Farm</th>
+                <th>Quantity</th>
+                <th>Unit Price</th>
+                <th>Subtotal</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for item in order.items.all %}
+                <tr>
+                  <td><strong>{{ item.product_name }}</strong></td>
+                  <td>
+                    <span class="badge bg-light text-dark border">{{ item.farmer.farmer_profile.farm_name|default:item.farmer.username }}</span>
+                  </td>
+                  <td>{{ item.quantity }} {{ item.unit }}</td>
+                  <td>₹{{ item.unit_price }}</td>
+                  <td class="fw-bold text-success">₹{{ item.subtotal|floatformat:2 }}</td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        <div class="p-3 border-top bg-light text-end">
+          <div class="d-inline-block text-start" style="min-width: 240px;">
+            <div class="d-flex justify-content-between mb-1">
+              <span class="text-muted">Subtotal:</span>
+              <strong>₹{{ order.total_amount|floatformat:2 }}</strong>
+            </div>
+            <div class="d-flex justify-content-between mb-2">
+              <span class="text-muted">Delivery Fee:</span>
+              <span>₹{{ order.delivery_fee|floatformat:2 }}</span>
+            </div>
+            <div class="d-flex justify-content-between border-top pt-2 fs-5 fw-bold text-success">
+              <span>Grand Total:</span>
+              <span>₹{{ order.final_amount|floatformat:2 }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Delivery & Payment Info -->
+    <div class="col-lg-4">
+      <div class="card border-0 shadow-sm rounded-4 p-4 bg-white mb-4">
+        <h5 class="fw-bold mb-3 pb-2 border-bottom"><i class="bi bi-geo-alt me-2 text-danger"></i> Delivery Details</h5>
+        <p class="mb-1 fw-bold">{{ order.shipping_full_name }}</p>
+        <p class="small text-muted mb-1"><i class="bi bi-telephone"></i> {{ order.shipping_phone }}</p>
+        <p class="small text-secondary mb-2">{{ order.shipping_address }}, {{ order.shipping_city }} - {{ order.shipping_pincode }}</p>
+        {% if order.delivery_instructions %}
+          <div class="p-2 bg-light rounded small text-muted">
+            <strong>Notes:</strong> {{ order.delivery_instructions }}
+          </div>
+        {% endif %}
+      </div>
+
+      <div class="card border-0 shadow-sm rounded-4 p-4 bg-white">
+        <h5 class="fw-bold mb-3 pb-2 border-bottom"><i class="bi bi-credit-card me-2 text-primary"></i> Payment Details</h5>
+        <div class="d-flex justify-content-between mb-2 small">
+          <span class="text-muted">Method:</span>
+          <strong>{{ order.payment.get_payment_method_display|default:order.payment_status }}</strong>
+        </div>
+        <div class="d-flex justify-content-between mb-2 small">
+          <span class="text-muted">Payment Status:</span>
+          <span class="badge {% if order.payment_status == 'completed' %}bg-success{% else %}bg-warning text-dark{% endif %}">
+            {{ order.get_payment_status_display }}
+          </span>
+        </div>
+        <div class="d-flex justify-content-between small">
+          <span class="text-muted">Transaction ID:</span>
+          <small class="text-muted">{{ order.payment.transaction_id|default:"-" }}</small>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+

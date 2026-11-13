@@ -1,0 +1,58 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Admin Portal Login - FromRythu{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-md-6 col-lg-5">
+      <div class="card border-0 shadow-lg rounded-4 overflow-hidden border-top border-4 border-danger">
+        <div class="p-4 text-center text-white" style="background: linear-gradient(135deg, #7f1d1d 0%, #991b1b 100%);">
+          <div class="rounded-circle bg-white text-danger mx-auto mb-3 d-flex align-items-center justify-content-center" style="width: 64px; height: 64px; font-size: 2rem;">
+            <i class="bi bi-shield-lock"></i>
+          </div>
+          <h3 class="fw-bold mb-1">Admin Portal</h3>
+          <p class="small text-light opacity-90 mb-0">Marketplace Governance, Farmer Approvals & Analytics</p>
+        </div>
+
+        <div class="card-body p-4 p-md-5">
+          <form method="POST" action="{% url 'accounts:admin_login' %}" class="needs-validation" novalidate>
+            {% csrf_token %}
+
+            <div class="mb-3">
+              <label class="form-label fw-semibold" for="id_username">Admin Username</label>
+              <div class="input-group">
+                <span class="input-group-text bg-light"><i class="bi bi-person-fill-lock"></i></span>
+                <input type="text" name="username" class="form-control" id="id_username" placeholder="admin" required autofocus>
+              </div>
+            </div>
+
+            <div class="mb-4">
+              <label class="form-label fw-semibold" for="id_password">Master Password</label>
+              <div class="input-group">
+                <span class="input-group-text bg-light"><i class="bi bi-key-fill"></i></span>
+                <input type="password" name="password" class="form-control" id="id_password" placeholder="••••••••" required>
+              </div>
+            </div>
+
+            <button type="submit" class="btn btn-danger w-100 py-2 fs-6 fw-bold shadow-sm mb-3">
+              <i class="bi bi-shield-check me-1"></i> Authenticate Admin Access
+            </button>
+          </form>
+
+          <div class="p-3 bg-light rounded-3 text-center small mb-3">
+            <strong>Default Admin Credentials:</strong><br>
+            Username: <code class="text-danger">admin</code> | Password: <code>admin123</code>
+          </div>
+
+          <div class="text-center small text-muted">
+            <a href="{% url 'home' %}" class="text-muted"><i class="bi bi-arrow-left me-1"></i> Back to Homepage</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
