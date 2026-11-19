@@ -33,15 +33,25 @@ DEBUG = os.getenv("DEBUG", "False").strip().lower() in (
     "true", "1", "yes"
 )
 
+# Allow localhost and all Vercel deployment subdomains
 ALLOWED_HOSTS = [
-    host.strip()
-    for host in os.getenv(
-        "ALLOWED_HOSTS",
-        "localhost,127.0.0.1,.vercel.app"
-    ).split(",")
-    if host.strip()
+    "localhost",
+    "127.0.0.1",
+    ".vercel.app",
 ]
 
+# Add any additional hosts from environment variables
+extra_hosts = os.getenv("ALLOWED_HOSTS", "")
+
+ALLOWED_HOSTS.extend(
+    host.strip()
+    for host in extra_hosts.split(",")
+    if host.strip()
+)
+
+ALLOWED_HOSTS = list(set(ALLOWED_HOSTS))
+
+# CSRF trusted origins
 CSRF_TRUSTED_ORIGINS = [
     origin.strip()
     for origin in os.getenv(
@@ -51,6 +61,7 @@ CSRF_TRUSTED_ORIGINS = [
     if origin.strip()
 ]
 
+# HTTPS security settings
 if not DEBUG:
     SECURE_PROXY_SSL_HEADER = (
         "HTTP_X_FORWARDED_PROTO",
@@ -146,7 +157,7 @@ if DATABASE_URL:
     }
 
 elif not DEBUG:
-    # Do not use SQLite on Vercel production
+    # Production must never fall back to SQLite
     raise ValueError(
         "DATABASE_URL is missing. "
         "Configure Supabase PostgreSQL in Vercel."
@@ -250,8 +261,7 @@ MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / "media"
 
 # Vercel filesystem is temporary.
-# Use Supabase Storage or another cloud storage
-# for permanent farmer/product image uploads.
+# Use cloud storage for permanent farmer/product uploads.
 
 # --------------------------------------------------
 # DEFAULT PRIMARY KEY
