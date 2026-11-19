@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # FromRythu (RYTHU_DIRECT)
 ### Farmer-to-Customer Direct Selling Marketplace
 
@@ -311,3 +312,6 @@ All 4 test cases run and pass cleanly with `OK`.
 | **Admin Reports & Analytics** | `/admin-panel/reports/` | Admin Only |
 | **Django Native Admin** | `/admin/` | Staff Only |
 
+=======
+# FromRythu
+>>>>>>> bc4c7fad09d02abcbe6485b61d7123100c30f68e
