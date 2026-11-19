@@ -1,8 +1,11 @@
 
+import logging
+
 from django.shortcuts import render, redirect
 from django.contrib.auth import login, logout
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.db import transaction
 
 from .forms import (
     FarmerRegistrationForm,
@@ -12,8 +15,14 @@ from .forms import (
 )
 
 
+logger = logging.getLogger(__name__)
+
 AUTH_BACKEND = "django.contrib.auth.backends.ModelBackend"
 
+
+# =====================================================
+# UNIFIED LOGIN
+# =====================================================
 
 def unified_login_view(request):
 
@@ -21,11 +30,18 @@ def unified_login_view(request):
         return redirect("dashboard:role_redirect")
 
     if request.method == "POST":
+
         form = UserLoginForm(request, data=request.POST)
 
         if form.is_valid():
+
             user = form.get_user()
-            login(request, user)
+
+            login(
+                request,
+                user,
+                backend=AUTH_BACKEND
+            )
 
             messages.success(
                 request,
@@ -43,6 +59,10 @@ def unified_login_view(request):
         {"form": form}
     )
 
+
+# =====================================================
+# FARMER LOGIN
+# =====================================================
 
 def farmer_login_view(request):
 
@@ -62,13 +82,20 @@ def farmer_login_view(request):
             user = form.get_user()
 
             if user.role != "farmer":
+
                 messages.error(
                     request,
                     "This account is not registered as a Farmer. "
                     "Please use the correct login portal."
                 )
+
             else:
-                login(request, user)
+
+                login(
+                    request,
+                    user,
+                    backend=AUTH_BACKEND
+                )
 
                 messages.success(
                     request,
@@ -88,6 +115,10 @@ def farmer_login_view(request):
     )
 
 
+# =====================================================
+# CUSTOMER LOGIN
+# =====================================================
+
 def customer_login_view(request):
 
     if request.user.is_authenticated:
@@ -106,13 +137,20 @@ def customer_login_view(request):
             user = form.get_user()
 
             if user.role != "customer":
+
                 messages.error(
                     request,
                     "This account is not registered as a Customer. "
                     "Please use the correct login portal."
                 )
+
             else:
-                login(request, user)
+
+                login(
+                    request,
+                    user,
+                    backend=AUTH_BACKEND
+                )
 
                 messages.success(
                     request,
@@ -131,6 +169,10 @@ def customer_login_view(request):
         {"form": form}
     )
 
+
+# =====================================================
+# ADMIN LOGIN
+# =====================================================
 
 def admin_login_view(request):
 
@@ -156,12 +198,19 @@ def admin_login_view(request):
                 or user.is_staff
                 or user.role == "admin"
             ):
+
                 messages.error(
                     request,
                     "Unauthorized access. Admin privileges required."
                 )
+
             else:
-                login(request, user)
+
+                login(
+                    request,
+                    user,
+                    backend=AUTH_BACKEND
+                )
 
                 messages.success(
                     request,
@@ -180,6 +229,10 @@ def admin_login_view(request):
     )
 
 
+# =====================================================
+# REGISTRATION SELECTION
+# =====================================================
+
 def register_selection_view(request):
 
     return render(
@@ -187,6 +240,10 @@ def register_selection_view(request):
         "accounts/register.html"
     )
 
+
+# =====================================================
+# FARMER REGISTRATION
+# =====================================================
 
 def register_farmer_view(request):
 
@@ -200,7 +257,10 @@ def register_farmer_view(request):
         if form.is_valid():
 
             try:
-                user = form.save()
+
+                with transaction.atomic():
+
+                    user = form.save()
 
                 login(
                     request,
@@ -217,11 +277,28 @@ def register_farmer_view(request):
                 return redirect("farmers:dashboard")
 
             except Exception:
+
+                logger.exception(
+                    "Farmer registration failed."
+                )
+
                 messages.error(
                     request,
                     "Unable to create your farmer account. "
-                    "Please try again or contact support."
+                    "Please check the server logs."
                 )
+
+        else:
+
+            logger.warning(
+                "Farmer registration validation failed: %s",
+                form.errors.as_json()
+            )
+
+            messages.error(
+                request,
+                "Please correct the errors in the registration form."
+            )
 
     else:
         form = FarmerRegistrationForm()
@@ -232,6 +309,10 @@ def register_farmer_view(request):
         {"form": form}
     )
 
+
+# =====================================================
+# CUSTOMER REGISTRATION
+# =====================================================
 
 def register_customer_view(request):
 
@@ -245,7 +326,10 @@ def register_customer_view(request):
         if form.is_valid():
 
             try:
-                user = form.save()
+
+                with transaction.atomic():
+
+                    user = form.save()
 
                 login(
                     request,
@@ -262,11 +346,28 @@ def register_customer_view(request):
                 return redirect("customers:dashboard")
 
             except Exception:
+
+                logger.exception(
+                    "Customer registration failed."
+                )
+
                 messages.error(
                     request,
                     "Unable to create your customer account. "
-                    "Please try again or contact support."
+                    "Please check the server logs."
                 )
+
+        else:
+
+            logger.warning(
+                "Customer registration validation failed: %s",
+                form.errors.as_json()
+            )
+
+            messages.error(
+                request,
+                "Please correct the errors in the registration form."
+            )
 
     else:
         form = CustomerRegistrationForm()
@@ -277,6 +378,10 @@ def register_customer_view(request):
         {"form": form}
     )
 
+
+# =====================================================
+# USER PROFILE
+# =====================================================
 
 @login_required
 def profile_view(request):
@@ -293,16 +398,30 @@ def profile_view(request):
 
         if form.is_valid():
 
-            form.save()
+            try:
 
-            messages.success(
-                request,
-                "Your profile has been updated successfully."
-            )
+                form.save()
 
-            return redirect("accounts:profile")
+                messages.success(
+                    request,
+                    "Your profile has been updated successfully."
+                )
+
+                return redirect("accounts:profile")
+
+            except Exception:
+
+                logger.exception(
+                    "Profile update failed."
+                )
+
+                messages.error(
+                    request,
+                    "Unable to update your profile. Please try again."
+                )
 
     else:
+
         form = UserProfileUpdateForm(instance=user)
 
     farmer_profile = getattr(
@@ -327,6 +446,10 @@ def profile_view(request):
         }
     )
 
+
+# =====================================================
+# LOGOUT
+# =====================================================
 
 def logout_view(request):
 
