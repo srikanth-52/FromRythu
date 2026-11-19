@@ -1,53 +1,124 @@
-{% extends 'base.html' %}
-{% load static %}
+<!doctype html>
+<html lang="en">
 
-{% block title %}Sign In - FromRythu{% endblock %}
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Login | FromRythu</title>
 
-{% block content %}
-<div class="container py-5">
-  <div class="row justify-content-center">
-    <div class="col-md-6 col-lg-5">
-      <div class="card border-0 shadow-lg rounded-4 overflow-hidden">
-        <div class="p-4 text-center text-white bg-success" style="background-color: #1b4332 !important;">
-          <h3 class="fw-bold mb-1">Sign In to FromRythu</h3>
-          <p class="small text-light opacity-90 mb-0">Direct Marketplace for Rythus & Customers</p>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+
+<body class="bg-light">
+
+  <main class="container min-vh-100 d-flex align-items-center justify-content-center py-5">
+
+    <div class="card border-0 shadow-sm rounded-4 w-100" style="max-width:680px">
+
+      <div class="card-body p-4 p-md-5">
+
+        <h2 class="fw-bold text-center">
+          Welcome to FromRythu
+        </h2>
+
+        <p class="text-secondary text-center mb-4">
+          Choose your account type to continue.
+        </p>
+
+        {% if messages %}
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags|default:'info' }}">
+          {{ message }}
         </div>
+        {% endfor %}
+        {% endif %}
 
-        <div class="card-body p-4 p-md-5">
-          <div class="d-flex gap-2 mb-4">
-            <a href="{% url 'accounts:farmer_login' %}" class="btn btn-outline-success flex-fill small fw-bold">
-              <i class="bi bi-person-badge me-1"></i> Farmer Login
-            </a>
-            <a href="{% url 'accounts:customer_login' %}" class="btn btn-outline-primary flex-fill small fw-bold">
-              <i class="bi bi-bag-check me-1"></i> Customer Login
-            </a>
-          </div>
+        <div class="row g-3">
 
-          <form method="POST" action="{% url 'accounts:login' %}" class="needs-validation" novalidate>
-            {% csrf_token %}
+          <!-- Farmer Login -->
+          <div class="col-md-4">
 
-            <div class="mb-3">
-              <label class="form-label fw-semibold" for="id_username">Username</label>
-              <input type="text" name="username" class="form-control" id="id_username" placeholder="Enter username" required autofocus>
+            <div class="card h-100 border-success">
+              <div class="card-body text-center p-3">
+
+                <h5 class="fw-bold mb-3">
+                  Farmer
+                </h5>
+
+                <p class="text-secondary small">
+                  Manage your farm and products.
+                </p>
+
+                <a href="{% url 'accounts:farmer_login' %}" class="btn btn-success w-100 py-2">
+                  Farmer Login
+                </a>
+
+              </div>
             </div>
 
-            <div class="mb-4">
-              <label class="form-label fw-semibold" for="id_password">Password</label>
-              <input type="password" name="password" class="form-control" id="id_password" placeholder="Enter password" required>
+          </div>
+
+          <!-- Customer Login -->
+          <div class="col-md-4">
+
+            <div class="card h-100 border-success">
+              <div class="card-body text-center p-3">
+
+                <h5 class="fw-bold mb-3">
+                  Customer
+                </h5>
+
+                <p class="text-secondary small">
+                  Shop fresh produce from farmers.
+                </p>
+
+                <a href="{% url 'accounts:customer_login' %}" class="btn btn-outline-success w-100 py-2">
+                  Customer Login
+                </a>
+
+              </div>
             </div>
 
-            <button type="submit" class="btn btn-rythu w-100 py-2 fs-6 fw-bold shadow-sm mb-3">
-              Sign In
-            </button>
-          </form>
-
-          <div class="text-center small">
-            Don't have an account? <a href="{% url 'accounts:register' %}" class="text-success fw-bold">Register here</a>
           </div>
+
+          <!-- Admin Login -->
+          <div class="col-md-4">
+
+            <div class="card h-100 border-dark">
+              <div class="card-body text-center p-3">
+
+                <h5 class="fw-bold mb-3">
+                  Admin
+                </h5>
+
+                <p class="text-secondary small">
+                  Access the administration portal.
+                </p>
+
+                <a href="{% url 'accounts:admin_login' %}" class="btn btn-dark w-100 py-2">
+                  Admin Login
+                </a>
+
+              </div>
+            </div>
+
+          </div>
+
         </div>
+
+        <p class="text-center mt-4 mb-0">
+          New to FromRythu?
+
+          <a href="{% url 'accounts:register' %}">
+            Create an account
+          </a>
+        </p>
+
       </div>
     </div>
-  </div>
-</div>
-{% endblock %}
 
+  </main>
+
+</body>
+
+</html>

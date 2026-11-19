@@ -1,86 +1,99 @@
-{% extends 'base.html' %}
-{% load static %}
+<!doctype html>
+<html lang="en">
 
-{% block title %}User Profile - FromRythu{% endblock %}
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>My Profile | FromRythu</title>
 
-{% block content %}
-<div class="container py-5">
-  <div class="row g-4">
-    <div class="col-md-4">
-      <div class="card border-0 shadow-sm rounded-4 p-4 text-center">
-        <div class="rounded-circle bg-success text-white mx-auto mb-3 d-flex align-items-center justify-content-center shadow" style="width: 80px; height: 80px; font-size: 2.2rem;">
-          {{ user.first_name|first|default:user.username|first|upper }}
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+
+<body class="bg-light">
+
+  <main class="container py-5">
+
+    <div class="card border-0 shadow-sm rounded-4 mx-auto" style="max-width:760px">
+
+      <div class="card-body p-4 p-md-5">
+
+        <h2 class="fw-bold mb-1">My Profile</h2>
+
+        <p class="text-secondary mb-4">
+          Update your account information.
+        </p>
+
+        {% if messages %}
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags|default:'info' }}">
+          {{ message }}
         </div>
-        <h4 class="fw-bold mb-1">{{ user.get_full_name|default:user.username }}</h4>
-        <span class="badge bg-success-subtle text-success text-capitalize px-3 py-1 mb-2">{{ user.role }} Account</span>
-        <div class="small text-muted mb-3"><i class="bi bi-envelope"></i> {{ user.email }}</div>
-        
-        {% if user.is_verified %}
-          <div class="alert alert-success py-2 small mb-3"><i class="bi bi-shield-check"></i> Verified Account</div>
-        {% else %}
-          <div class="alert alert-warning py-2 small mb-3"><i class="bi bi-clock-history"></i> Verification Pending</div>
+        {% endfor %}
         {% endif %}
 
-        <div class="d-grid gap-2 text-start small border-top pt-3">
-          {% if user.is_farmer %}
-            <a href="{% url 'farmers:dashboard' %}" class="btn btn-outline-success btn-sm"><i class="bi bi-speedometer2 me-1"></i> Farmer Dashboard</a>
-            <a href="{% url 'farmers:manage_products' %}" class="btn btn-outline-secondary btn-sm"><i class="bi bi-box-seam me-1"></i> Manage Produce</a>
-          {% elif user.is_customer %}
-            <a href="{% url 'customers:dashboard' %}" class="btn btn-outline-primary btn-sm"><i class="bi bi-speedometer2 me-1"></i> Customer Dashboard</a>
-            <a href="{% url 'customers:my_orders' %}" class="btn btn-outline-secondary btn-sm"><i class="bi bi-receipt me-1"></i> My Orders</a>
-          {% elif user.is_admin_role %}
-            <a href="{% url 'dashboard:admin_dashboard' %}" class="btn btn-outline-danger btn-sm"><i class="bi bi-shield-lock me-1"></i> Admin Dashboard</a>
-          {% endif %}
-        </div>
-      </div>
-    </div>
+        <form method="post" enctype="multipart/form-data">
 
-    <div class="col-md-8">
-      <div class="card border-0 shadow-sm rounded-4 p-4">
-        <h4 class="fw-bold mb-3 pb-2 border-bottom">Edit Profile Information</h4>
-        <form method="POST" enctype="multipart/form-data" class="needs-validation" novalidate>
           {% csrf_token %}
-          <div class="row g-3">
-            <div class="col-md-6">
-              <label class="form-label fw-semibold">First Name</label>
-              <input type="text" name="first_name" class="form-control" value="{{ user.first_name }}">
-            </div>
-            <div class="col-md-6">
-              <label class="form-label fw-semibold">Last Name</label>
-              <input type="text" name="last_name" class="form-control" value="{{ user.last_name }}">
-            </div>
-            <div class="col-md-6">
-              <label class="form-label fw-semibold">Email Address</label>
-              <input type="email" name="email" class="form-control" value="{{ user.email }}">
-            </div>
-            <div class="col-md-6">
-              <label class="form-label fw-semibold">Phone Number</label>
-              <input type="text" name="phone_number" class="form-control" value="{{ user.phone_number|default:'' }}">
-            </div>
-            <div class="col-12">
-              <label class="form-label fw-semibold">Address</label>
-              <textarea name="address" class="form-control" rows="2">{{ user.address|default:'' }}</textarea>
-            </div>
-            <div class="col-md-4">
-              <label class="form-label fw-semibold">City</label>
-              <input type="text" name="city" class="form-control" value="{{ user.city|default:'' }}">
-            </div>
-            <div class="col-md-4">
-              <label class="form-label fw-semibold">State</label>
-              <input type="text" name="state" class="form-control" value="{{ user.state|default:'Telangana' }}">
-            </div>
-            <div class="col-md-4">
-              <label class="form-label fw-semibold">Pincode</label>
-              <input type="text" name="pincode" class="form-control" value="{{ user.pincode|default:'' }}">
-            </div>
+
+          {% if form.non_field_errors %}
+          <div class="alert alert-danger">
+            {{ form.non_field_errors }}
           </div>
-          <div class="mt-4">
-            <button type="submit" class="btn btn-success px-4 fw-semibold">Save Profile Changes</button>
+          {% endif %}
+
+          <div class="row">
+
+            {% for field in form %}
+
+            <div class="col-md-6 mb-3">
+
+              <label class="form-label" for="{{ field.id_for_label }}">
+                {{ field.label }}
+              </label>
+
+              {{ field }}
+
+              {% if field.help_text %}
+              <div class="form-text">
+                {{ field.help_text }}
+              </div>
+              {% endif %}
+
+              {% for error in field.errors %}
+              <div class="text-danger small">
+                {{ error }}
+              </div>
+              {% endfor %}
+
+            </div>
+
+            {% endfor %}
+
           </div>
+
+          <button class="btn btn-success px-4" type="submit">
+            Save Changes
+          </button>
+
+          <a class="btn btn-outline-secondary ms-2" href="{% url 'dashboard:role_redirect' %}">
+            Cancel
+          </a>
+
         </form>
+
       </div>
     </div>
-  </div>
-</div>
-{% endblock %}
 
+  </main>
+
+  <script>
+    document.querySelectorAll(
+      'input:not([type=checkbox]):not([type=file]), select, textarea, input[type=file]'
+    ).forEach(input => {
+      input.classList.add('form-control');
+    });
+  </script>
+
+</body>
+
+</html>

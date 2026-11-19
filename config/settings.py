@@ -1,28 +1,21 @@
 
-"""
-Django settings for FromRythu (RYTHU_DIRECT) project.
-Farmer-to-Customer Direct Selling Marketplace.
-"""
-
 from pathlib import Path
 import os
 import dj_database_url
 from dotenv import load_dotenv
 from django.contrib.messages import constants as messages
 
-# --------------------------------------------------
+# ==================================================
 # BASE DIRECTORY
-# --------------------------------------------------
+# ==================================================
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# Load local .env file
-# Vercel uses Environment Variables
 load_dotenv(BASE_DIR / ".env")
 
-# --------------------------------------------------
-# SECURITY SETTINGS
-# --------------------------------------------------
+# ==================================================
+# SECURITY
+# ==================================================
 
 SECRET_KEY = os.getenv(
     "SECRET_KEY",
@@ -33,14 +26,16 @@ DEBUG = os.getenv("DEBUG", "False").strip().lower() in (
     "true", "1", "yes"
 )
 
-# Allow localhost and all Vercel deployment subdomains
+# Always allow local development and Vercel domains.
+# A leading dot allows both the root domain and subdomains.
 ALLOWED_HOSTS = [
     "localhost",
     "127.0.0.1",
     ".vercel.app",
+    "from-rythu.vercel.app",
 ]
 
-# Add any additional hosts from environment variables
+# Add extra hosts without replacing the defaults.
 extra_hosts = os.getenv("ALLOWED_HOSTS", "")
 
 ALLOWED_HOSTS.extend(
@@ -51,29 +46,32 @@ ALLOWED_HOSTS.extend(
 
 ALLOWED_HOSTS = list(set(ALLOWED_HOSTS))
 
-# CSRF trusted origins
 CSRF_TRUSTED_ORIGINS = [
-    origin.strip()
-    for origin in os.getenv(
-        "CSRF_TRUSTED_ORIGINS",
-        "https://from-rythu.vercel.app,https://*.vercel.app"
-    ).split(",")
-    if origin.strip()
+    "https://from-rythu.vercel.app",
+    "https://*.vercel.app",
 ]
 
-# HTTPS security settings
+extra_origins = os.getenv("CSRF_TRUSTED_ORIGINS", "")
+
+CSRF_TRUSTED_ORIGINS.extend(
+    origin.strip()
+    for origin in extra_origins.split(",")
+    if origin.strip()
+)
+
+CSRF_TRUSTED_ORIGINS = list(set(CSRF_TRUSTED_ORIGINS))
+
 if not DEBUG:
     SECURE_PROXY_SSL_HEADER = (
         "HTTP_X_FORWARDED_PROTO",
         "https"
     )
-
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True
 
-# --------------------------------------------------
-# APPLICATION DEFINITION
-# --------------------------------------------------
+# ==================================================
+# APPLICATIONS
+# ==================================================
 
 INSTALLED_APPS = [
     "django.contrib.admin",
@@ -83,7 +81,6 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
 
-    # Custom Marketplace Apps
     "accounts.apps.AccountsConfig",
     "farmers.apps.FarmersConfig",
     "customers.apps.CustomersConfig",
@@ -95,9 +92,9 @@ INSTALLED_APPS = [
     "dashboard.apps.DashboardConfig",
 ]
 
-# --------------------------------------------------
+# ==================================================
 # MIDDLEWARE
-# --------------------------------------------------
+# ==================================================
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
@@ -109,15 +106,15 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
 
-# --------------------------------------------------
+# ==================================================
 # URL CONFIGURATION
-# --------------------------------------------------
+# ==================================================
 
 ROOT_URLCONF = "config.urls"
 
-# --------------------------------------------------
+# ==================================================
 # TEMPLATES
-# --------------------------------------------------
+# ==================================================
 
 TEMPLATES = [
     {
@@ -137,17 +134,15 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "config.wsgi.application"
 
-# --------------------------------------------------
-# DATABASE CONFIGURATION
-#
+# ==================================================
+# DATABASE
 # Production: Supabase PostgreSQL
 # Local: MySQL or SQLite
-# --------------------------------------------------
+# ==================================================
 
 DATABASE_URL = os.getenv("DATABASE_URL")
 
 if DATABASE_URL:
-    # Supabase PostgreSQL
     DATABASES = {
         "default": dj_database_url.config(
             default=DATABASE_URL,
@@ -157,14 +152,12 @@ if DATABASE_URL:
     }
 
 elif not DEBUG:
-    # Production must never fall back to SQLite
     raise ValueError(
         "DATABASE_URL is missing. "
         "Configure Supabase PostgreSQL in Vercel."
     )
 
 elif os.getenv("DB_ENGINE", "sqlite3").lower() == "mysql":
-    # Local MySQL
     DATABASES = {
         "default": {
             "ENGINE": "django.db.backends.mysql",
@@ -174,16 +167,13 @@ elif os.getenv("DB_ENGINE", "sqlite3").lower() == "mysql":
             "HOST": os.getenv("DB_HOST", "127.0.0.1"),
             "PORT": os.getenv("DB_PORT", "3306"),
             "OPTIONS": {
-                "init_command": (
-                    "SET sql_mode='STRICT_TRANS_TABLES'"
-                ),
+                "init_command": "SET sql_mode='STRICT_TRANS_TABLES'",
                 "charset": "utf8mb4",
             },
         }
     }
 
 else:
-    # Local development SQLite
     DATABASES = {
         "default": {
             "ENGINE": "django.db.backends.sqlite3",
@@ -191,15 +181,15 @@ else:
         }
     }
 
-# --------------------------------------------------
+# ==================================================
 # CUSTOM USER MODEL
-# --------------------------------------------------
+# ==================================================
 
 AUTH_USER_MODEL = "accounts.User"
 
-# --------------------------------------------------
+# ==================================================
 # PASSWORD VALIDATION
-# --------------------------------------------------
+# ==================================================
 
 AUTH_PASSWORD_VALIDATORS = [
     {
@@ -228,21 +218,20 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-# --------------------------------------------------
+# ==================================================
 # INTERNATIONALIZATION
-# --------------------------------------------------
+# ==================================================
 
 LANGUAGE_CODE = "en-us"
 
 TIME_ZONE = "Asia/Kolkata"
 
 USE_I18N = True
-
 USE_TZ = True
 
-# --------------------------------------------------
+# ==================================================
 # STATIC FILES
-# --------------------------------------------------
+# ==================================================
 
 STATIC_URL = "/static/"
 
@@ -252,26 +241,22 @@ STATICFILES_DIRS = [
 
 STATIC_ROOT = BASE_DIR / "staticfiles"
 
-# --------------------------------------------------
+# ==================================================
 # MEDIA FILES
-# --------------------------------------------------
+# ==================================================
 
 MEDIA_URL = "/media/"
-
 MEDIA_ROOT = BASE_DIR / "media"
 
-# Vercel filesystem is temporary.
-# Use cloud storage for permanent farmer/product uploads.
-
-# --------------------------------------------------
+# ==================================================
 # DEFAULT PRIMARY KEY
-# --------------------------------------------------
+# ==================================================
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
-# --------------------------------------------------
+# ==================================================
 # LOGIN / LOGOUT
-# --------------------------------------------------
+# ==================================================
 
 LOGIN_URL = "accounts:login"
 
@@ -279,9 +264,9 @@ LOGIN_REDIRECT_URL = "dashboard:role_redirect"
 
 LOGOUT_REDIRECT_URL = "home"
 
-# --------------------------------------------------
-# BOOTSTRAP MESSAGE ALERTS
-# --------------------------------------------------
+# ==================================================
+# MESSAGE TAGS
+# ==================================================
 
 MESSAGE_TAGS = {
     messages.DEBUG: "secondary",
