@@ -100,7 +100,6 @@ st.sidebar.info("""
 - Django Server: `http://127.0.0.1:8000/`
 - Farmer Login: `farmer_ramesh` / `farmer123`
 - Customer Login: `customer_anita` / `customer123`
-- Admin Login: `admin` / `admin123`
 """)
 
 

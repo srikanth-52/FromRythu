@@ -77,18 +77,18 @@
   </div>
 </section>
 
-<!-- 3 Specialized Portals Cards -->
+<!-- Dedicated Portals Cards -->
 <section class="py-5 bg-white border-bottom">
   <div class="container">
     <div class="text-center mb-5">
       <span class="badge bg-success text-white px-3 py-2 uppercase fw-bold mb-2">Platform Portals</span>
-      <h2 class="fw-bold">Three Dedicated Workspaces</h2>
-      <p class="text-muted">Designed specifically for Farmers, Consumers, and Marketplace Administrators.</p>
+      <h2 class="fw-bold">Dedicated Workspaces</h2>
+      <p class="text-muted">Designed specifically for Farmers and Consumers to connect and trade directly.</p>
     </div>
 
-    <div class="row g-4">
+    <div class="row g-4 justify-content-center">
       <!-- Farmer Portal Card -->
-      <div class="col-md-4">
+      <div class="col-md-6">
         <div class="card h-100 border-0 shadow-sm rounded-4 p-4 text-center hover-elevate border-top border-4 border-success">
           <div class="icon-circle bg-success-subtle text-success mx-auto mb-3" style="width: 64px; height: 64px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.8rem;">
             <i class="bi bi-person-workspace"></i>
@@ -105,7 +105,7 @@
       </div>
 
       <!-- Customer Portal Card -->
-      <div class="col-md-4">
+      <div class="col-md-6">
         <div class="card h-100 border-0 shadow-sm rounded-4 p-4 text-center hover-elevate border-top border-4 border-primary">
           <div class="icon-circle bg-primary-subtle text-primary mx-auto mb-3" style="width: 64px; height: 64px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.8rem;">
             <i class="bi bi-bag-heart"></i>
@@ -117,23 +117,6 @@
           <div class="mt-auto">
             <a href="{% url 'accounts:customer_login' %}" class="btn btn-outline-primary w-100 fw-semibold mb-2">Customer Login</a>
             <a href="{% url 'accounts:register_customer' %}" class="small text-decoration-underline text-primary">Create Household Account</a>
-          </div>
-        </div>
-      </div>
-
-      <!-- Admin Portal Card -->
-      <div class="col-md-4">
-        <div class="card h-100 border-0 shadow-sm rounded-4 p-4 text-center hover-elevate border-top border-4 border-danger">
-          <div class="icon-circle bg-danger-subtle text-danger mx-auto mb-3" style="width: 64px; height: 64px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.8rem;">
-            <i class="bi bi-shield-lock"></i>
-          </div>
-          <h4 class="fw-bold">Admin Portal</h4>
-          <p class="text-muted small">
-            Comprehensive control panel for auditing farmers, verifying KYC/Aadhaar documents, managing categories, monitoring price trends, and generating platform analytics.
-          </p>
-          <div class="mt-auto">
-            <a href="{% url 'accounts:admin_login' %}" class="btn btn-outline-danger w-100 fw-semibold mb-2">Admin Login</a>
-            <span class="small text-muted">Strictly authorized staff & administrators</span>
           </div>
         </div>
       </div>

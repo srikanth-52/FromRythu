@@ -123,8 +123,6 @@
               <ul class="dropdown-menu dropdown-menu-end shadow">
                 <li><a class="dropdown-item py-2" href="{% url 'accounts:farmer_login' %}"><i class="bi bi-person-badge text-success me-2"></i> <strong>Farmer Portal Login</strong></a></li>
                 <li><a class="dropdown-item py-2" href="{% url 'accounts:customer_login' %}"><i class="bi bi-basket text-primary me-2"></i> <strong>Customer Login</strong></a></li>
-                <li><hr class="dropdown-divider"></li>
-                <li><a class="dropdown-item py-2 text-muted" href="{% url 'accounts:admin_login' %}"><i class="bi bi-shield-lock me-2"></i> Admin Portal Login</a></li>
               </ul>
             </div>
             <a href="{% url 'accounts:register' %}" class="btn btn-rythu">Register</a>
@@ -169,12 +167,12 @@
         </div>
 
         <div class="col-lg-2 col-md-6">
-          <h5>Three Portals</h5>
+          <h5>Portals</h5>
           <ul class="list-unstyled small">
             <li class="mb-2"><a href="{% url 'accounts:farmer_login' %}">Farmer Portal</a></li>
             <li class="mb-2"><a href="{% url 'accounts:customer_login' %}">Customer Portal</a></li>
-            <li class="mb-2"><a href="{% url 'accounts:admin_login' %}">Admin Portal</a></li>
             <li class="mb-2"><a href="{% url 'accounts:register_farmer' %}">Sell as a Farmer</a></li>
+            <li class="mb-2"><a href="{% url 'accounts:register_customer' %}">Customer Sign Up</a></li>
           </ul>
         </div>
 

@@ -39,10 +39,10 @@ def admin_required(view_func):
     @wraps(view_func)
     def _wrapped_view(request, *args, **kwargs):
         if not request.user.is_authenticated:
-            messages.warning(request, "Please log in with Admin privileges.")
-            return redirect('accounts:admin_login')
+            messages.warning(request, "Please log in to continue.")
+            return redirect('accounts:farmer_login')
         if not (request.user.role == 'admin' or request.user.is_superuser or request.user.is_staff):
-            messages.error(request, "Access restricted: Admin Portal authorization required.")
+            messages.error(request, "Access restricted.")
             return redirect('dashboard:role_redirect')
         return view_func(request, *args, **kwargs)
     return _wrapped_view

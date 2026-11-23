@@ -61,12 +61,15 @@ def unified_login_view(request):
 
 
 # =====================================================
-# FARMER LOGIN
+# FARMER LOGIN (Also handles Admin direct login)
 # =====================================================
 
 def farmer_login_view(request):
 
     if request.user.is_authenticated:
+
+        if request.user.is_admin_role or request.user.role == "admin":
+            return redirect("dashboard:admin_dashboard")
 
         if request.user.role == "farmer":
             return redirect("farmers:dashboard")
@@ -81,15 +84,7 @@ def farmer_login_view(request):
 
             user = form.get_user()
 
-            if user.role != "farmer":
-
-                messages.error(
-                    request,
-                    "This account is not registered as a Farmer. "
-                    "Please use the correct login portal."
-                )
-
-            else:
+            if user.role == "farmer":
 
                 login(
                     request,
@@ -104,6 +99,28 @@ def farmer_login_view(request):
                 )
 
                 return redirect("farmers:dashboard")
+
+            elif user.is_admin_role or user.role == "admin" or user.is_superuser or user.is_staff:
+
+                login(
+                    request,
+                    user,
+                    backend=AUTH_BACKEND
+                )
+
+                messages.success(
+                    request,
+                    f"Welcome back, {user.first_name or user.username}!"
+                )
+
+                return redirect("dashboard:admin_dashboard")
+
+            else:
+
+                messages.error(
+                    request,
+                    "Invalid credentials. Please verify your username and password."
+                )
 
     else:
         form = UserLoginForm()
@@ -171,62 +188,19 @@ def customer_login_view(request):
 
 
 # =====================================================
-# ADMIN LOGIN
+# ADMIN LOGIN (Redirects directly to Farmer Login)
 # =====================================================
 
 def admin_login_view(request):
-
     if request.user.is_authenticated:
-
         if (
             request.user.is_superuser
             or request.user.is_staff
             or request.user.role == "admin"
         ):
             return redirect("dashboard:admin_dashboard")
-
-    if request.method == "POST":
-
-        form = UserLoginForm(request, data=request.POST)
-
-        if form.is_valid():
-
-            user = form.get_user()
-
-            if not (
-                user.is_superuser
-                or user.is_staff
-                or user.role == "admin"
-            ):
-
-                messages.error(
-                    request,
-                    "Unauthorized access. Admin privileges required."
-                )
-
-            else:
-
-                login(
-                    request,
-                    user,
-                    backend=AUTH_BACKEND
-                )
-
-                messages.success(
-                    request,
-                    "Admin Portal Authenticated."
-                )
-
-                return redirect("dashboard:admin_dashboard")
-
-    else:
-        form = UserLoginForm()
-
-    return render(
-        request,
-        "accounts/admin_login.html",
-        {"form": form}
-    )
+        return redirect("dashboard:role_redirect")
+    return redirect("accounts:farmer_login")
 
 
 # =====================================================
