@@ -267,9 +267,9 @@ This opens **http://localhost:8501** featuring:
 
 ## 🔑 Default Demo Login Credentials
 
-| Role | Username | Password | Dashboard URL | Description |
+| Role | Username | Password | Login Portal | Description |
 | :--- | :--- | :--- | :--- | :--- |
-| **Admin** | `admin` | `admin123` | `/admin-panel/dashboard/` | Full platform control & farmer approvals |
+| **Admin** | `admin` | `admin123` | Farmer Login (`/accounts/farmer-login/`) | Direct access to Admin Dashboard |
 | **Farmer 1** | `farmer_ramesh` | `farmer123` | `/farmer/dashboard/` | Ramesh Reddy (Paddy, Toor Dal, Cotton) |
 | **Farmer 2** | `farmer_venkat` | `farmer123` | `/farmer/dashboard/` | Venkat Rao (Foxtail Millet, Teja Chilli) |
 | **Farmer 3** | `farmer_laxmi` | `farmer123` | `/farmer/dashboard/` | Laxmi Devi (Fresh Farm Tomatoes, Veggies) |
