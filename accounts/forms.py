@@ -235,14 +235,53 @@ class CustomerRegistrationForm(UserCreationForm):
 
 class UserLoginForm(AuthenticationForm):
 
+    username = forms.CharField(
+        label="Username or Email",
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Enter username or registered email',
+            'autofocus': True
+        })
+    )
+    password = forms.CharField(
+        label="Password",
+        strip=False,
+        widget=forms.PasswordInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Enter password'
+        })
+    )
     remember_me = forms.BooleanField(
         required=False,
         initial=True,
         label="Keep me signed in"
     )
 
-    def confirm_login_allowed(self, user):
-        super().confirm_login_allowed(user)
+    def clean(self):
+        username = self.cleaned_data.get('username')
+        password = self.cleaned_data.get('password')
+
+        if username and password:
+            clean_user = username.strip()
+            # If an email was entered, lookup corresponding username
+            if '@' in clean_user:
+                matched_user = User.objects.filter(email__iexact=clean_user).first()
+                if matched_user:
+                    clean_user = matched_user.username
+                    self.cleaned_data['username'] = clean_user
+
+            from django.contrib.auth import authenticate
+            self.user_cache = authenticate(
+                self.request,
+                username=clean_user,
+                password=password
+            )
+            if self.user_cache is None:
+                raise self.get_invalid_login_error()
+            else:
+                self.confirm_login_allowed(self.user_cache)
+
+        return self.cleaned_data
 
 
 class UserProfileUpdateForm(forms.ModelForm):

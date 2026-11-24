@@ -11,6 +11,10 @@ urlpatterns = [
     path("customer-login/", views.customer_login_view, name="customer_login"),
     path("admin-login/", views.admin_login_view, name="admin_login"),
 
+    # Email OTP Login
+    path("send-otp/", views.send_otp_view, name="send_otp"),
+    path("verify-otp/", views.verify_otp_view, name="verify_otp"),
+
     # Registration
     path("register/", views.register_selection_view, name="register"),
     path("register/farmer/", views.register_farmer_view, name="register_farmer"),
