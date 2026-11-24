@@ -139,7 +139,6 @@ def edit_product_view(request, pk):
         }
     )
 
-
 @farmer_required
 def toggle_product_active_view(request, pk):
     product = get_object_or_404(Product, pk=pk, farmer=request.user)
