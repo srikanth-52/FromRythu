@@ -10,10 +10,18 @@ from messaging.models import Message
 from .forms import FarmerProfileForm, ProductForm, StockForm, PriceChangeForm
 from .models import FarmerProfile
 
+
 @farmer_required
 def dashboard_view(request):
     user = request.user
-    profile, _ = FarmerProfile.objects.get_or_create(user=user, defaults={'farm_name': f"{user.first_name or user.username}'s Farm", 'farm_location': user.address or 'Telangana', 'primary_crops': 'Paddy, Pulses'})
+    profile, _ = FarmerProfile.objects.get_or_create(
+        user=user,
+        defaults={
+            'farm_name': f"{user.first_name or user.username}'s Farm",
+            'farm_location': user.address or 'Telangana',
+            'primary_crops': 'Paddy, Pulses'
+        }
+    )
 
     farmer_products = Product.objects.filter(farmer=user)
     total_products = farmer_products.count()
@@ -24,9 +32,9 @@ def dashboard_view(request):
     pending_orders = order_items.filter(item_status='pending').count()
 
     # Total revenue from delivered/completed items
-    total_revenue = order_items.filter(item_status__in=['accepted', 'packed', 'shipped', 'delivered']).aggregate(
-        rev=Sum('subtotal')
-    )['rev'] or 0
+    total_revenue = order_items.filter(
+        item_status__in=['accepted', 'packed', 'shipped', 'delivered']
+    ).aggregate(rev=Sum('subtotal'))['rev'] or 0
 
     recent_orders = order_items.select_related('order', 'order__customer').order_by('-order__created_at')[:8]
     low_stock_products = [p for p in farmer_products if p.available_stock <= 20]
@@ -65,12 +73,26 @@ def add_product_view(request):
                     created_by=request.user
                 )
 
-            messages.success(request, f"Produce '{product.name}' has been added with {initial_stock} {product.unit} stock!")
+            messages.success(
+                request,
+                f"Produce '{product.name}' has been added with {initial_stock} {product.unit} stock!"
+            )
             return redirect('farmers:manage_products')
+        else:
+            messages.error(request, "Please correct the errors in the product form.")
     else:
         form = ProductForm()
 
-    return render(request, 'farmer/add_product.html', {'form': form})
+    categories = Category.objects.all().order_by('name')
+    return render(
+        request,
+        'farmer/add_product.html',
+        {
+            'form': form,
+            'is_edit': False,
+            'categories': categories,
+        }
+    )
 
 
 @farmer_required
@@ -97,10 +119,25 @@ def edit_product_view(request, pk):
                 )
             messages.success(request, f"Produce '{product.name}' updated successfully.")
             return redirect('farmers:manage_products')
+        else:
+            messages.error(request, "Please correct the errors in the product form.")
     else:
-        form = ProductForm(instance=product, initial={'initial_stock': product.available_stock})
+        form = ProductForm(
+            instance=product,
+            initial={'initial_stock': product.available_stock}
+        )
 
-    return render(request, 'farmer/add_product.html', {'form': form, 'is_edit': True, 'product': product})
+    categories = Category.objects.all().order_by('name')
+    return render(
+        request,
+        'farmer/add_product.html',
+        {
+            'form': form,
+            'is_edit': True,
+            'product': product,
+            'categories': categories,
+        }
+    )
 
 
 @farmer_required
@@ -125,7 +162,10 @@ def stock_view(request):
             record = form.save(commit=False)
             record.created_by = user
             record.save()
-            messages.success(request, f"Stock record added: {record.get_transaction_type_display()} ({record.quantity} {record.product.unit}) for {record.product.name}.")
+            messages.success(
+                request,
+                f"Stock record added: {record.get_transaction_type_display()} ({record.quantity} {record.product.unit}) for {record.product.name}."
+            )
             return redirect('farmers:stock')
     else:
         form = StockForm(farmer=user)
@@ -162,7 +202,10 @@ def price_view(request):
                     reason=reason,
                     changed_by=user
                 )
-                messages.success(request, f"Price of {product.name} updated from ₹{old_p} to ₹{new_price_dec}/{product.unit}.")
+                messages.success(
+                    request,
+                    f"Price of {product.name} updated from ₹{old_p} to ₹{new_price_dec}/{product.unit}."
+                )
             except ValueError:
                 messages.error(request, "Invalid price entered.")
         return redirect('farmers:price')
@@ -177,7 +220,7 @@ def price_view(request):
 def orders_view(request):
     user = request.user
     order_items = OrderItem.objects.filter(farmer=user).select_related('order', 'order__customer', 'product').order_by('-order__created_at')
-    
+
     status_filter = request.GET.get('status')
     if status_filter:
         order_items = order_items.filter(item_status=status_filter)
@@ -213,7 +256,10 @@ def update_item_status_view(request, item_id):
                 order.status = 'accepted'
                 order.save()
 
-            messages.success(request, f"Order #{item.order.order_number} item '{item.product_name}' status updated to {item.get_item_status_display()}.")
+            messages.success(
+                request,
+                f"Order #{item.order.order_number} item '{item.product_name}' status updated to {item.get_item_status_display()}."
+            )
     return redirect('farmers:orders')
 
 
@@ -242,8 +288,10 @@ def messages_view(request):
     # Mark received as read
     received.filter(is_read=False).update(is_read=True)
 
-    # Distinct conversation partners
-    contact_ids = set(list(received.values_list('sender_id', flat=True)) + list(sent.values_list('receiver_id', flat=True)))
+    contact_ids = set(
+        list(received.values_list('sender_id', flat=True)) +
+        list(sent.values_list('receiver_id', flat=True))
+    )
     from accounts.models import User as AppUser
     contacts = AppUser.objects.filter(id__in=contact_ids)
 
