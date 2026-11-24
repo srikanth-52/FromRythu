@@ -4,7 +4,8 @@
 {% block title %}FromRythu - Direct Farmer to Customer Marketplace{% endblock %}
 
 {% block content %}
-<!-- Hero Section -->
+{% if not user.is_authenticated %}
+<!-- Hero Section (Logged-Out Guests Only) -->
 <section class="hero-banner">
   <div class="container">
     <div class="row align-items-center">
@@ -77,7 +78,7 @@
   </div>
 </section>
 
-<!-- Dedicated Portals Cards -->
+<!-- Dedicated Portals Cards (Logged-Out Guests Only) -->
 <section class="py-5 bg-white border-bottom">
   <div class="container">
     <div class="text-center mb-5">
@@ -123,6 +124,62 @@
     </div>
   </div>
 </section>
+{% else %}
+<!-- Logged-in Welcome Banner -->
+<section class="py-4 bg-white border-bottom shadow-sm">
+  <div class="container">
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
+      <div>
+        <div class="d-flex align-items-center gap-2 mb-1">
+          <span class="badge bg-success text-white px-2 py-1 small">
+            <i class="bi bi-person-check me-1"></i>{{ user.role|title }} Account
+          </span>
+          <span class="text-muted small">Direct Farmer Marketplace</span>
+        </div>
+        <h2 class="fw-bold mb-1 text-dark">
+          Welcome back, <span class="text-success">{{ user.first_name|default:user.username }}</span>!
+        </h2>
+        <p class="text-secondary small mb-0">
+          {% if user.is_farmer %}
+            Manage your listed harvests, track incoming orders, control prices, and manage stock.
+          {% elif user.is_customer %}
+            Order fresh, unadulterated farm produce directly from verified local farmers at fair prices.
+          {% else %}
+            Access the administrative control center and system analytics.
+          {% endif %}
+        </p>
+      </div>
+      <div class="d-flex flex-wrap gap-2">
+        {% if user.is_farmer %}
+          <a href="{% url 'farmers:dashboard' %}" class="btn btn-success fw-semibold shadow-sm">
+            <i class="bi bi-speedometer2 me-1"></i> Farmer Dashboard
+          </a>
+          <a href="{% url 'farmers:add_product' %}" class="btn btn-outline-success fw-semibold">
+            <i class="bi bi-plus-circle me-1"></i> Add Fresh Harvest
+          </a>
+          <a href="{% url 'farmers:orders' %}" class="btn btn-outline-secondary fw-semibold">
+            <i class="bi bi-receipt me-1"></i> Orders
+          </a>
+        {% elif user.is_customer %}
+          <a href="{% url 'products:list' %}" class="btn btn-success fw-semibold shadow-sm">
+            <i class="bi bi-shop me-1"></i> Browse All Produce
+          </a>
+          <a href="{% url 'customers:my_orders' %}" class="btn btn-outline-success fw-semibold">
+            <i class="bi bi-box2-heart me-1"></i> My Orders
+          </a>
+          <a href="{% url 'orders:cart' %}" class="btn btn-outline-secondary fw-semibold">
+            <i class="bi bi-cart3 me-1"></i> Cart
+          </a>
+        {% elif user.is_admin_role %}
+          <a href="{% url 'dashboard:admin_dashboard' %}" class="btn btn-danger fw-semibold shadow-sm">
+            <i class="bi bi-shield-lock me-1"></i> Admin Panel
+          </a>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</section>
+{% endif %}
 
 <!-- Categories Grid -->
 <section class="py-5">
